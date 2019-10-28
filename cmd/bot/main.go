@@ -2,10 +2,9 @@ package main
 
 import (
 	"log"
-
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-
 	"github.com/KASthinker/TimeLordBot/configs"
+	"github.com/KASthinker/TimeLordBot/internal/buttons"
 )
 
 func main() {
@@ -24,15 +23,20 @@ func main() {
 	updates, err := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
-			continue
+		if update.CallbackQuery != nil{
+			cmsg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID,"")
+			cmsg.Text = update.CallbackQuery.Data
+			bot.Send(cmsg)
 		}
+		if update.Message != nil {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			switch update.Message {
+			default:
+				msg.ReplyMarkup = buttons.YesORNot()
+			}
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		msg.ReplyToMessageID = update.Message.MessageID
-
-		bot.Send(msg)
+			bot.Send(msg)
+		}
 	}
 }
