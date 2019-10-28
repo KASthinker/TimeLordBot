@@ -1,0 +1,8 @@
+[bot]
+Token = ""
+
+[database]
+user = ""
+password = ""
+host = ""
+dbname = ""
