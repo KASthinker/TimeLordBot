@@ -1,148 +1,175 @@
 package buttons
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+import (
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	loc "github.com/KASthinker/TimeLordBot/internal/localization"
+)
 
 // StartButtons ...
-func StartButtons() *tgbotapi.InlineKeyboardMarkup {
+func StartButtons(lang string) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("📖 Mеню", "menu"),
-			tgbotapi.NewInlineKeyboardButtonData("⚙️ Настройки", "setting"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"📖 " + loc.TrMess(lang, "Menu"), "menu"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"⚙️ " + loc.TrMess(lang, "Setting"), "setting"),
 		),
 	)
 	return &keyboard
 }
 
 // Menu ...
-func Menu() *tgbotapi.InlineKeyboardMarkup {
+func Menu(lang string) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("📝 Новая задача", "new_task"),
-			tgbotapi.NewInlineKeyboardButtonData("🗑 Удалить задачу", "delete_task"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"📝 " + loc.TrMess(lang, "New task"), "new_task"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🗑 " + loc.TrMess(lang, "Delete task"), "delete_task"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🧾 Задачи на сегодня", "today_tasks"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🧾 " + loc.TrMess(lang, "Tasks for today"), "today_tasks"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("📜 Личные задачи", "personal_tasks"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"📜 " + loc.TrMess(lang, "Personal tasks"), "personal_tasks"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("💼 Групповые задачи", "group_tasks"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"💼 " + loc.TrMess(lang, "Group tasks"), "group_tasks"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("👔 Группы", "groups"),
-			tgbotapi.NewInlineKeyboardButtonData("🔙 Назад", "step_back"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"👔 " + loc.TrMess(lang, "Groups"), "groups"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🔙 " + loc.TrMess(lang, "Back"), "step_back"),
 		),
 	)
 	return &keyboard
 }
 
 // Settings ...
-func Settings() *tgbotapi.InlineKeyboardMarkup {
+func Settings(lang string) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🕑 Часовой пояс", "change_timezone"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🕑 " + loc.TrMess(lang, "Timezone"), "change_timezone"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🕑 Формат времени", "change_format_time"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🕑 " + loc.TrMess(lang, "Time format"), "change_format_time"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("‼️ Удалить аккаунт", "delete_my_account"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"‼️ " + loc.TrMess(lang, "Delete account"), "delete_my_account"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🕑 Язык", "change_language"),
-			tgbotapi.NewInlineKeyboardButtonData("🔙 Назад", "step_back"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🕑 " + loc.TrMess(lang, "Language"), "change_language"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🔙 " + loc.TrMess(lang, "Back"), "step_back"),
 		),
 	)
 	return &keyboard
 }
 
 // TypeTasks ...
-func TypeTasks() *tgbotapi.InlineKeyboardMarkup {
+func TypeTasks(lang string) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("👨🏼‍💻 Обычная", "common_task"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"👨🏼‍💻 " + loc.TrMess(lang, "Common"), "common_task"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🏃🏼‍♂️ Повседневная", "everyday_task"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🏃🏼‍♂️ " + loc.TrMess(lang, "Everyday"), "everyday_task"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🍸 Праздничная", "holiday_task"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🍸 " + loc.TrMess(lang, "Holiday"), "holiday_task"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔙 Назад", "step_back"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🔙 " + loc.TrMess(lang, "Back"), "step_back"),
 		),
 	)
 	return &keyboard
 }
 
 // Groups ...
-func Groups() *tgbotapi.InlineKeyboardMarkup {
+func Groups(lang string) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("💼 Мои группы", "my_groups"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"💼 " + loc.TrMess(lang, "My groups"), "my_groups"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🤴 Создать группу", "create_groups"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🤴 " + loc.TrMess(lang, "Create group"), "create_groups"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("💣 Удалить группу", "delete_group"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"💣 " + loc.TrMess(lang, "Delete group"), "delete_group"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔙 Назад", "step_back"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🔙 " + loc.TrMess(lang, "Back"), "step_back"),
 		),
 	)
 	return &keyboard
 }
 
 // InputTimeZone ...
-func InputTimeZone() *tgbotapi.InlineKeyboardMarkup {
+func InputTimeZone(lang string) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Ввести в ручную", "input_timezone"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.TrMess(lang, "Enter manually"), "input_timezone"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Использовать GPS ", "use_GPS"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.TrMess(lang, "Use GPS"), "use_GPS"),
 		),
 	)
 	return &keyboard
 }
 
 // SendUserLocation ...
-func SendUserLocation() *tgbotapi.ReplyKeyboardMarkup {
+func SendUserLocation(lang string) *tgbotapi.ReplyKeyboardMarkup {
 	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButtonLocation("Отправить своё местоположение"),
+			tgbotapi.NewKeyboardButtonLocation(loc.TrMess(lang, "Submit your location")),
 		),
 	)
 	return &keyboard
 }
 
 // Priority ...
-func Priority() *tgbotapi.ReplyKeyboardMarkup {
+func Priority(lang string) *tgbotapi.ReplyKeyboardMarkup {
 	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Важно и срочно"),
+			tgbotapi.NewKeyboardButton(loc.TrMess(lang, "Do")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Важно, но неcрочно"),
+			tgbotapi.NewKeyboardButton(loc.TrMess(lang, "Schedule")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Не важно, но срочно"),
+			tgbotapi.NewKeyboardButton(loc.TrMess(lang, "Delegate")),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Не важно и несрочно"),
+			tgbotapi.NewKeyboardButton(loc.TrMess(lang, "Eliminate")),
 		),
 	)
 	return &keyboard
 }
 
 //YesORNot ...
-func YesORNot() *tgbotapi.ReplyKeyboardMarkup {
+func YesORNot(lang string) *tgbotapi.ReplyKeyboardMarkup {
 	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Да"),
-			tgbotapi.NewKeyboardButton("Нет"),
+			tgbotapi.NewKeyboardButton(loc.TrMess(lang, "Yes")),
+			tgbotapi.NewKeyboardButton(loc.TrMess(lang, "No")),
 		),
 	)
 	return &keyboard

@@ -1,0 +1,38 @@
+{
+    "Menu":"Menu",
+    "Setting": "Setting",
+    "New task": "New task",
+    "Delete task": "Delete task",
+    "Tasks for today": "Tasks for today",
+    "Personal tasks": "Personal tasks",
+    "Group tasks": "Group tasks",
+    "Groups": "Groups",
+
+    "Back": "Back",
+
+    "Timezone": "Timezone",
+    "Time format": "Time format",
+    "Delete account": "Delete account",
+    "Language": "Language",
+
+    "Common": "Common",
+    "Everyday":"Everyday",
+    "Holiday": "Holiday",
+
+    "My groups": "My groups",
+    "Create group": "Create group",
+    "Delete group": "Delete group",
+
+    "Enter manually": "Enter manually",
+    "Use GPS": "Use GPS",
+
+    "Submit your location": "Submit your location",
+
+    "Do": "Do",
+    "Schedule": "Schedule",
+    "Delegate": "Delegate",
+    "Eliminate": "Eliminate",
+
+    "Yes": "Yes",
+    "No": "No"
+}

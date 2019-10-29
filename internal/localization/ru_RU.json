@@ -1,0 +1,38 @@
+{
+    "Menu":"Меню",
+    "Setting": "Натройки",
+    "New task": "Новая задача",
+    "Delete task":  "Удалить задачу",
+    "Tasks for today": "Задачи на сегодня",
+    "Personal tasks": "Личные задачи",
+    "Group tasks": "Групповые задачи",
+    "Groups": "Группы",
+
+    "Back": "Назад",
+
+    "Timezone": "Часовой пояс",
+    "Time format": "Формат времени",
+    "Delete account": "Удалить аккаунт",
+    "Language": "Язык",
+
+    "Common": "Обычная",
+    "Everyday":"Повседневная",
+    "Holiday": "Праздничная",
+
+    "My groups": "Мои группы",
+    "Create group": "Создать группу",
+    "Delete group": "Удалить группу",
+
+    "Enter manually": "Ввести в ручную",
+    "Use GPS": "Использовать GPS",
+
+    "Submit your location": "Отправить своё местоположение",
+
+    "Do": "Важно и срочно",
+    "Schedule": "Важно, но не срочно",
+    "Delegate": "Не важно, но срочно",
+    "Eliminate": "Не важно и не срочно",
+
+    "Yes": "Да",
+    "No": "Нет"
+}
