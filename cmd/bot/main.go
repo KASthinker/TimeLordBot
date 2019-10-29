@@ -34,7 +34,7 @@ func main() {
 
 			switch update.Message {
 			default:
-				msg.ReplyMarkup = buttons.Menu("en_EN")
+				msg.ReplyMarkup = buttons.Menu("ru_RU")
 			}
 
 			bot.Send(msg)

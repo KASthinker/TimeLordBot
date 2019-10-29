@@ -7,11 +7,13 @@ import (
 )
 
 // TrMess translate message
-func TrMess(lang string, text string) string {
+func TrMess(lang string, typeText string, text string) string {
 
-	type trText map[string]string
+	type trText map[string]map[string]string
 	var data trText
-    path := "/media/data/Projects/GO/src/github.com/KASthinker/TimeLordBot/internal/localization/"
+	//Изменить path
+	path := "/media/data/Projects/GO/src/github.com/KASthinker/TimeLordBot/internal/localization/"
+	///////////////
 	file, err := ioutil.ReadFile(path + lang + ".json")
 	if err != nil {
 		log.Fatal(err)
@@ -22,10 +24,11 @@ func TrMess(lang string, text string) string {
 		log.Fatal(err)
 	}
 
-	val, ok := data[text]
+	val, ok := data[typeText][text]
 	if !ok {
-		log.Printf("Key map \"%v\" not fiund!", text)
+		log.Printf("Key map \"[%v][%v]\" not fiund!", typeText, text)
 		return ""
 	}
+
 	return val
 }
