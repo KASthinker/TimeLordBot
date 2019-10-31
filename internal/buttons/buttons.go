@@ -176,3 +176,17 @@ func YesORNot(lang string) *tgbotapi.ReplyKeyboardMarkup {
 	)
 	return &keyboard
 }
+
+
+// Language ...
+func Language() *tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🇷🇺 Russian", "ru_RU"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🇺🇸 English", "en_EN"),
+		),
+	)
+	return &keyboard
+}

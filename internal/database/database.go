@@ -3,9 +3,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"sync"
 
-	//"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/KASthinker/TimeLordBot/configs"
 )
@@ -34,4 +35,20 @@ func Connect() (*sql.DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+
+// IfUserExists ...
+func IfUserExists(userID int64) bool {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+	}
+	var count int
+	err := db.QueryRow(fmt.Sprintf("SHOW TABLES LIKE '%v'", userID)).Scan(&count)
+	
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
 }
