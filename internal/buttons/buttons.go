@@ -163,6 +163,7 @@ func Priority(lang string) *tgbotapi.ReplyKeyboardMarkup {
 			tgbotapi.NewKeyboardButton(loc.TrMess(lang, typeText, "Eliminate")),
 		),
 	)
+	keyboard.OneTimeKeyboard = true
 	return &keyboard
 }
 
@@ -174,6 +175,7 @@ func YesORNot(lang string) *tgbotapi.ReplyKeyboardMarkup {
 			tgbotapi.NewKeyboardButton(loc.TrMess(lang, typeText, "No")),
 		),
 	)
+	keyboard.OneTimeKeyboard = true
 	return &keyboard
 }
 

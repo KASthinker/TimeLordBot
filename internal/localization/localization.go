@@ -16,7 +16,7 @@ func TrMess(lang string, typeText string, text string) string {
 	///////////////
 	file, err := ioutil.ReadFile(path + lang + ".json")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(path + lang + ".json" + " not found!")
 	}
 
 	err = json.Unmarshal(file, &data)

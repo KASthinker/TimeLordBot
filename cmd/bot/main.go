@@ -2,81 +2,93 @@ package main
 
 import (
 	"log"
-	"fmt"
+
+	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 	"github.com/KASthinker/TimeLordBot/configs"
 	"github.com/KASthinker/TimeLordBot/internal/buttons"
-	loc "github.com/KASthinker/TimeLordBot/internal/localization"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	db "github.com/KASthinker/TimeLordBot/internal/database"
+	lang "github.com/KASthinker/TimeLordBot/internal/localization"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
+
+var (
+	// NewUserDataMap ...
+	NewUserDataMap map[int64]*data.NewUserData
+)
+
+func init() {
+	NewUserDataMap = make(map[int64]*data.NewUserData)
+	data.Bot, data.Err = tgbotapi.NewBotAPI(configs.GetToken())
+	if data.Err != nil {
+		log.Println(data.Err)
+	}
+	data.Bot.Debug = true
+
+	log.Printf("Authorized on account %s", data.Bot.Self.UserName)
+}
 
 func main() {
 	typeText := "message"
-	
-	bot, err := tgbotapi.NewBotAPI(configs.GetToken())
-	if err != nil {
-		log.Println(err)
-	}
-
-	bot.Debug = true
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 30
-
-	updates, err := bot.GetUpdatesChan(u)
+	updates, err := data.Bot.GetUpdatesChan(u)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Print(".")
 	for update := range updates {
-		lang := "en_EN"
-		if update.CallbackQuery != nil{
-			cmsg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "")
-			switch update.CallbackQuery.Data {
-			case "en_EN":
-				bot.AnswerCallbackQuery(
-					tgbotapi.NewCallback(update.CallbackQuery.ID, "English"))
-				cmsg.Text = loc.TrMess(lang, typeText,
-					"Enter your time zone.")
-				cmsg.ReplyMarkup = buttons.InputTimeZone(lang)
-			case "ru_RU":
-				bot.AnswerCallbackQuery(
-					tgbotapi.NewCallback(update.CallbackQuery.ID, "Russian"))
-				cmsg.Text = loc.TrMess(lang, typeText,
-					"Enter your time zone.")
-				cmsg.ReplyMarkup = buttons.InputTimeZone(lang)
-			}
-			bot.Send(cmsg)
-		}
-		if update.Message != nil {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+		if update.CallbackQuery != nil {
 
-			switch update.Message.Command() {
+		} else if update.Message != nil {
+			message := update.Message
+			sndMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+			user, ok := NewUserDataMap[message.Chat.ID]
+			if !ok {
+				if db.IfUserExists(message.Chat.ID) {
+					NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
+					user = NewUserDataMap[message.Chat.ID]
+					// user[message.Chat.ID].Language =
+					// user[message.Chat.ID].Timezone =
+				} else {
+					NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
+					user = NewUserDataMap[message.Chat.ID]
+					user.Language = "en_EN"
+				}
+			}
+
+			switch message.Command() {
 			case "start":
-				if db.IfUserExists(update.Message.Chat.ID) {
-					msg.Text = loc.TrMess(lang, typeText, 
+				if db.IfUserExists(message.Chat.ID) {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
 						"Hello! Good to see you again! Your task list is uploaded.")
-					msg.ReplyMarkup = buttons.StartButtons(lang)
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					go data.Bot.Send(sndMsg)
+					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+					continue
 				} else {
-					msg.Text = loc.TrMess(lang, typeText, 
-						"Hello! Welcome. Choose your language please.")
-					msg.ReplyMarkup = buttons.Language()
-				}
-			default:
-				if db.IfUserExists(update.Message.Chat.ID) {
-					msg.Text = loc.TrMess(lang, typeText, 
-						"I don't understand this command!")
-					msg.ReplyMarkup = buttons.StartButtons(lang)
-				} else {
-					msg.Text = loc.TrMess(lang, typeText, 
-						"Account not found! Please register! To register, enter /start.")
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Hello! Welcome. Choose your language please:")
+					sndMsg.ReplyMarkup = buttons.Language()
+					go data.Bot.Send(sndMsg)
+					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+					continue
 				}
 			}
-
-			bot.Send(msg)
+			switch message.Text {
+			default:
+				if db.IfUserExists(message.Chat.ID) {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"I don't understand this command!")
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					go data.Bot.Send(sndMsg)
+					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				} else {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Account not found! Please register! To register, enter /start.")
+					go data.Bot.Send(sndMsg)
+					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				}
+			}
 		}
 	}
 }

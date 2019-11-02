@@ -1,35 +1,46 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
+	"sync"
+
+	"github.com/KASthinker/TimeLordBot/configs"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/KASthinker/TimeLordBot/internal/database"
+)
+
+var (
+	err  error
+	db   *sql.DB
+	once sync.Once
 )
 
 func main() {
-	db, err := database.Connect()
-	if err != nil {
-		panic(err)
-	}
+	once.Do(func() {
+		conf := configs.Config()
+		db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", conf.User, conf.Password, conf.DBname))
+	})
 	defer db.Close()
 
-	_, err = db.Exec("ALTER DATABASE TimeLordBot charset=utf8;")
-
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
-	fmt.Println("OK")
-	
+	//defer db.Close()
+
+	db.Exec("ALTER DATABASE TimeLordBot charset=utf8;")
+
 	_, err = db.Exec(
 		`CREATE TABLE Users (
-            user_id INT NOT NULL,
+			user_id INT NOT NULL,
+			language VARCHAR(6) NOT NULL DEFAULT 'en_EN',
             type_account VARCHAR(6) NOT NULL DEFAULT 'User',
             timezone VARCHAR(3) NOT NULL,
             group_id VARCHAR(255),
             PRIMARY KEY (user_id)
 		);`)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	fmt.Println("OK")
 
@@ -43,7 +54,7 @@ func main() {
 			PRIMARY KEY (id)
 		);`)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	fmt.Println("OK")
 }

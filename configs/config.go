@@ -4,13 +4,14 @@ import (
 	"log"
 
 	"github.com/BurntSushi/toml"
-	"github.com/KASthinker/TimeLordBot/"
+	//"github.com/KASthinker/TimeLordBot/configs"
 )
 
 // Token ...
 type Token struct {
 	Token string `tom;:"Token"`
 }
+
 // DataBase ...
 type DataBase struct {
 	User     string `toml:"User"`
@@ -22,9 +23,8 @@ type DataBase struct {
 // GetToken ...
 func GetToken() string {
 	var tkn Token
-	//path := "/media/data/Projects/GO/src/github.com/KASthinker/TimeLordBot/configs/"
-	help := TimeLordBot.configs.helpconf
-	if _, err := toml.DecodeFile(help, &tkn); err != nil {
+	path := "/media/data/Projects/GO/src/github.com/KASthinker/TimeLordBot/configs/"
+	if _, err := toml.DecodeFile(path+"helpconf.toml", &tkn); err != nil {
 		log.Fatalf("Token not received: %v", err)
 	}
 	return tkn.Token

@@ -28,5 +28,17 @@
         "Eliminate": "Не важно и не срочно",
         "Yes": "Да",
         "No": "Нет"
+    },
+    "message":{
+        "I don't understand this command!": "Я не понимаю эту команду!",
+        "Hello! Welcome. Choose your language please:": "Здравствуйте! Добро пожаловать! Выберите язык:",
+        "Hello! Good to see you again! Your task list is uploaded.": "Здравствуйте! Рад снова видель вас! Ваш список задач загружен.",
+        "Enter your timezone:": "Введите ваш часовой пояс:",
+        "Account not found! Please register! To register, enter /start.": "Аккаунт не найден! Пожалуйста, зарегистрируйтесь! Для регистрации введите /start",
+        "Press button:": "Нажмите кнопку:",
+        "Is your time \"": "Ваше время \"",
+        "Registration completed successfully. Select an action:": "Регистрация прошла успешно. Выберите действие:",
+        "Invalid command. Enter /start": "Неверная команда. Введите /start",
+        "Something went wrong. Enter /start": "Что то пошло не так. Введите /start"
     }
 }

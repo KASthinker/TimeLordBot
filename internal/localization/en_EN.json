@@ -31,9 +31,14 @@
     },
     "message":{
         "I don't understand this command!": "I don't understand this command!",
-        "Hello! Welcome. Choose your language please.": "Hello! Welcome. Choose your language please.",
+        "Hello! Welcome. Choose your language please:": "Hello! Welcome. Choose your language please.",
         "Hello! Good to see you again! Your task list is uploaded.": "Hello! Good to see you again! Your task list is uploaded.",
-        "Enter your time zone.": "Enter your time zone.",
-        "Account not found! Please register! To register, enter /start.": "Account not found! Please register! To register, enter /start."
+        "Enter your timezone:": "Enter your timezone.",
+        "Account not found! Please register! To register, enter /start.": "Account not found! Please register! To register, enter /start.",
+        "Press button:": "Press button:",
+        "Is your time \"": "Is your time \"",
+        "Registration completed successfully. Select an action:": "Registration completed successfully. Select an action:",
+        "Invalid command. Enter /start": "Invalid command. Enter /start",
+        "Something went wrong. Enter /start": "Something went wrong. Enter /start"
     }
 }
