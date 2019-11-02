@@ -144,6 +144,7 @@ func SendUserLocation(lang string) *tgbotapi.ReplyKeyboardMarkup {
 			tgbotapi.NewKeyboardButtonLocation(loc.TrMess(lang, typeText, "Submit your location")),
 		),
 	)
+	keyboard.OneTimeKeyboard = true
 	return &keyboard
 }
 
