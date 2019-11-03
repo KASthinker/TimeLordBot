@@ -6,7 +6,7 @@ import (
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
-
+	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 	"github.com/KASthinker/TimeLordBot/configs"
 )
 
@@ -36,29 +36,31 @@ func Connect() (*sql.DB, error) {
 
 // IfUserExists ...
 func IfUserExists(userID int64) bool {
+	strUserID := fmt.Sprintf("'%v'", userID)
 	db, err = Connect()
 	if err != nil {
 		log.Println(err)
 	}
 	defer db.Close()
-	err := db.QueryRow(fmt.Sprintf("SHOW TABLES LIKE '%v'", userID))
-
-	if err != nil {
-		log.Println(err)
+	row := db.QueryRow(fmt.Sprintf("SHOW TABLES LIKE %v;", strUserID))
+	err = row.Scan()
+	if err == sql.ErrNoRows {
+		log.Printf("\n\n\n%v", row.Scan(err))
 		return false
 	}
 	return true
 }
 
 // NewUser ...
-func NewUser(lang, tz string, userID int64) error {
+func NewUser(user *data.NewUserData, userID int64) error {
+	strUserID := fmt.Sprintf("`%v`", userID)
 	db, err = Connect()
 	if err != nil {
 		log.Println(err)
 	}
 	defer db.Close()
 	_, err = db.Exec(fmt.Sprintf(`
-		CREATE TABLE %v%v%v (
+		CREATE TABLE %v (
 			id INT NOT NULL AUTO_INCREMENT,
 			type_task VARCHAR(15) NOT NULL,
 			text VARCHAR(255) NOT NULL,
@@ -67,18 +69,35 @@ func NewUser(lang, tz string, userID int64) error {
 			weekday VARCHAR(70),
 			priority VARCHAR(20) NOT NULL,
 			PRIMARY KEY (id)
-		);`,"`", userID,"`"))
+		);`,strUserID))
 	if err != nil {
-		log.Printf("\n\nError in add in Users\n%v\n\n\n", err)
+		log.Printf("\n\nError in add User table\n%v\n\n\n", err)
 		return err
 	}
 	_, err = db.Exec(fmt.Sprintf(`
 		INSERT INTO Users (user_id, language, timezone) 
-		VALUES (%v, %v, %v);`, userID, lang, tz))
+		VALUES (%v, '%v', '%v');`, userID, user.Language, user.Timezone))
 	if err != nil {
 		log.Printf("\n\nError in insert line\n%v\n\n\n", err)
 		return err
 	}
 
 	return nil
+}
+
+// GetUserData ...
+func GetUserData(userID int64, user *data.NewUserData) {
+	strUserID := fmt.Sprintf("'%v'", userID)
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+	}
+	defer db.Close()
+	row := db.QueryRow(fmt.Sprintf(
+		"SELECT language, timezone FROM Users WHERE user_id=%v", strUserID))
+	err = row.Scan(&user.Language, &user.Timezone)
+	if err == sql.ErrNoRows {
+		log.Printf("\n\n\n%v\n\n\n", err)
+	}
+	log.Printf("\n\n\nOK-> %v:%v\n\n\n", user.Language, user.Timezone)
 }

@@ -19,8 +19,7 @@ func MessageHandler(message *tgbotapi.Message) {
 		if db.IfUserExists(message.Chat.ID) {
 			data.NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
 			user = data.NewUserDataMap[message.Chat.ID]
-			// user[message.Chat.ID].Language =
-			// user[message.Chat.ID].Timezone =
+			db.GetUserData(message.Chat.ID, user)
 		} else {
 			data.NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
 			user = data.NewUserDataMap[message.Chat.ID]
@@ -34,8 +33,9 @@ func MessageHandler(message *tgbotapi.Message) {
 			loctime, tz := methods.TimeZone(message.Location.Longitude, message.Location.Latitude)
 			user.Timezone = tz
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
-				"Is your time \"") + fmt.Sprintf("\"%v\"?", loctime)
+				"Is your time ") + fmt.Sprintf("*%v*?", loctime)
 			sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
+			sndMsg.ParseMode = "Markdown"
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
@@ -62,6 +62,62 @@ func MessageHandler(message *tgbotapi.Message) {
 		return
 	}
 	switch message.Text {
+	case "Yes":
+		if user.Stage == 3 {
+			err := db.NewUser(user, message.Chat.ID)
+			if err != nil {
+				sndMsg.Text = "База данных не доступна! /start"
+				go data.Bot.Send(sndMsg)
+				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				user.Stage = 0
+			} else {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Registration completed successfully. Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				user.Stage = 0
+			}
+		} else {
+			user.Stage = 0
+		}
+	case "Да":
+		if user.Stage == 3 {
+			err := db.NewUser(user, message.Chat.ID)
+			if err != nil {
+				sndMsg.Text = "База данных не доступна! /start"
+				go data.Bot.Send(sndMsg)
+				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				user.Stage = 0
+			} else {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Registration completed successfully. Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				user.Stage = 0
+			}
+		} else {
+			user.Stage = 0
+		}
+	case "No":
+		if user.Stage == 3 {
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Try again. Enter your time zone:")
+			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+			go data.Bot.Send(sndMsg)
+			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			user.Stage = 1
+		}
+	case "Нет":
+		if user.Stage == 3 {
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Try again. Enter your time zone:")
+			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+			go data.Bot.Send(sndMsg)
+			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			user.Stage = 1
+		}
 	default:
 		if db.IfUserExists(message.Chat.ID) {
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
@@ -88,8 +144,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		if db.IfUserExists(message.Chat.ID) {
 			data.NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
 			user = data.NewUserDataMap[message.Chat.ID]
-			// user[message.Chat.ID].Language =
-			// user[message.Chat.ID].Timezone =
+			db.GetUserData(message.Chat.ID, user)
 		} else {
 			data.NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
 			user = data.NewUserDataMap[message.Chat.ID]

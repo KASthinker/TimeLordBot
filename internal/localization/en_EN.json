@@ -34,9 +34,10 @@
         "Hello! Welcome. Choose your language please:": "Hello! Welcome. Choose your language please.",
         "Hello! Good to see you again! Your task list is uploaded.": "Hello! Good to see you again! Your task list is uploaded.",
         "Enter your timezone:": "Enter your timezone.",
+        "Try again. Enter your time zone:": "Try again. Enter your time zone:",
         "Account not found! Please register! To register, enter /start.": "Account not found! Please register! To register, enter /start.",
         "Press button:": "Press button:",
-        "Is your time \"": "Is your time \"",
+        "Is your time ": "Is your time ",
         "Registration completed successfully. Select an action:": "Registration completed successfully. Select an action:",
         "Invalid command. Enter /start": "Invalid command. Enter /start",
         "Something went wrong. Enter /start": "Something went wrong. Enter /start"

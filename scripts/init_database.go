@@ -33,8 +33,8 @@ func main() {
 	_, err = db.Exec(
 		`CREATE TABLE Users (
 			user_id INT NOT NULL,
-			language VARCHAR(6) NOT NULL DEFAULT 'en_EN',
-            type_account VARCHAR(6) NOT NULL DEFAULT 'User',
+			language VARCHAR(6) NOT NULL,
+            type_account VARCHAR(6) DEFAULT 'User',
             timezone VARCHAR(3) NOT NULL,
             group_id VARCHAR(255),
             PRIMARY KEY (user_id)
