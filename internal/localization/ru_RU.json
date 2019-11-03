@@ -35,11 +35,13 @@
         "Hello! Good to see you again! Your task list is uploaded.": "Здравствуйте! Рад снова видель вас! Ваш список задач загружен.",
         "Enter your timezone:": "Введите ваш часовой пояс:",
         "Try again. Enter your time zone:": "Попробуйте ещё раз. Введите ваш часовой пояс:",
+        "Enter your time zone. Example Los Angeles \"-8\", Moscow \"+3\":": "Введите свой часовой пояс. Пример Москва \"+3\", Иркутск \"+8\":",
         "Account not found! Please register! To register, enter /start.": "Аккаунт не найден! Пожалуйста, зарегистрируйтесь! Для регистрации введите /start",
         "Press button:": "Нажмите кнопку:",
         "Is your time ": "Ваше время ",
         "Registration completed successfully. Select an action:": "Регистрация прошла успешно. Выберите действие:",
         "Invalid command. Enter /start": "Неверная команда. Введите /start",
-        "Something went wrong. Enter /start": "Что то пошло не так. Введите /start"
+        "Something went wrong. Enter /start": "Что то пошло не так. Введите /start",
+        "Incorrect time zone entered! Try again:": "Введен неправильный часовой пояс! Попробуйте еще раз:"
     }
 }

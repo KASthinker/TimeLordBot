@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+
 	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 	"github.com/KASthinker/TimeLordBot/internal/buttons"
 	db "github.com/KASthinker/TimeLordBot/internal/database"
@@ -30,7 +31,7 @@ func MessageHandler(message *tgbotapi.Message) {
 	if message.Location != nil {
 		if user.Stage == 2 {
 			user.Stage = 3
-			loctime, tz := methods.TimeZone(message.Location.Longitude, message.Location.Latitude)
+			loctime, tz := methods.TimeZoneGPS(message.Location.Longitude, message.Location.Latitude)
 			user.Timezone = tz
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Is your time ") + fmt.Sprintf("*%v*?", loctime)
@@ -126,10 +127,31 @@ func MessageHandler(message *tgbotapi.Message) {
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
-			sndMsg.Text = lang.TrMess(user.Language, typeText,
-				"Account not found! Please register! To register, enter /start.")
-			go data.Bot.Send(sndMsg)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			if user.Stage == 2 {
+				loctime, tz ,err := methods.TimeZoneManualy(message.Text)
+				if err != nil {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Incorrect time zone entered! Try again:")
+					sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+					user.Stage = 1
+					go data.Bot.Send(sndMsg)
+					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				} else {
+					user.Timezone = tz
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Is your time ") + fmt.Sprintf("*%v*?", loctime)
+					sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+					user.Stage = 3
+				}
+			} else {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Account not found! Please register! To register, enter /start.")
+				go data.Bot.Send(sndMsg)
+				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			}
 		}
 	}
 }
@@ -177,8 +199,9 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		}
 	case "input_timezone":
 		if user.Stage == 1 {
-			user.Stage = 0 // 2
-			sndMsg.Text = "В разработке!"
+			user.Stage = 2
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Enter your time zone. Example Los Angeles \"-8\", Moscow \"+3\":")
 			go data.Bot.Send(sndMsg)
 		} else {
 			user.Stage = 0
@@ -188,7 +211,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			data.Bot.DeleteMessage(
 				tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, callback.Message.MessageID))
 			sndMsg := tgbotapi.NewMessage(message.Chat.ID, "") // ReplyMarcup can't change
-			user.Stage = 2 // 2
+			user.Stage = 2                                     // 2
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Press button:")
 			sndMsg.ReplyMarkup = buttons.SendUserLocation(user.Language)
