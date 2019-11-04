@@ -57,6 +57,7 @@ func MessageHandler(message *tgbotapi.Message) {
 		} else {
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Hello! Welcome. Choose your language please:")
+			user.Stage = "reg_language"
 			sndMsg.ReplyMarkup = buttons.Language()
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
@@ -217,24 +218,56 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	// Registration Inline buttons
 	switch callback.Data {
 	case "en_EN":
-		if user.Stage == "" {
+		if user.Stage == "reg_language" {
 			user.Language = callback.Data
 			user.Stage = "registration_1"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Enter your timezone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 			go data.Bot.Send(sndMsg)
+		} else if user.Stage == "change_language" {
+			err := db.ChangeLanguage(callback.Message.Chat.ID, callback.Data)
+			if err != nil {
+				user.Stage = ""
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error changing language.Try again!")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+			} else {
+				user.Language = callback.Data
+				user.Stage = ""
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Language has changed! Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+			}
 		} else {
 			user.Stage = ""
 		}
 	case "ru_RU":
-		if user.Stage == "" {
+		if user.Stage == "reg_language" {
 			user.Language = callback.Data
 			user.Stage = "registration_1"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Enter your timezone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 			go data.Bot.Send(sndMsg)
+		} else if user.Stage == "change_language" {
+			err := db.ChangeLanguage(callback.Message.Chat.ID, callback.Data)
+			if err != nil {
+				user.Stage = ""
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error changing language.Try again!")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+			} else {
+				user.Language = callback.Data
+				user.Stage = ""
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Language has changed! Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+			}
 		} else {
 			user.Stage = ""
 		}
@@ -289,6 +322,12 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 				"This will permanently delete all your data!"+
 				"\nCancel - /cancel")
 		sndMsg.ParseMode = "Markdown"
+		go data.Bot.Send(sndMsg)
+	case "change_language":
+		user.Stage = "change_language"
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Choose your language please:")
+		sndMsg.ReplyMarkup = buttons.Language()
 		go data.Bot.Send(sndMsg)
 	}
 

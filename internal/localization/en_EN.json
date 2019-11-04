@@ -31,7 +31,7 @@
     },
     "message":{
         "I don't understand this command!": "I don't understand this command!",
-        "Hello! Welcome. Choose your language please:": "Hello! Welcome. Choose your language please.",
+        "Hello! Welcome. Choose your language please:": "Hello! Welcome. Choose your language please:",
         "Hello! Good to see you again! Your task list is uploaded.": "Hello! Good to see you again! Your task list is uploaded.",
         "Enter your timezone:": "Enter your timezone.",
         "Try again. Enter your time zone:": "Try again. Enter your time zone:",
@@ -49,6 +49,9 @@
         "Action canceled! Select an action:": "*Action canceled!* Select an action:",
         "Yes, I really want to delete my account!": "Yes, I really want to delete my account!",
         "Your account has been deleted. Goodbye!": "Your account has been deleted. Goodbye!",
-        "Error deleting account. Try again!": "Error deleting account. Try again!"
+        "Error deleting account. Try again!": "Error deleting account. Try again!",
+        "Choose your language please:": "Choose your language please:",
+        "Language has changed! Select an action:": "Language has changed! Select an action:",
+        "Error changing language.Try again!": "Error changing language. Try again!"
     }
 }

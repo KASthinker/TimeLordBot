@@ -35,7 +35,7 @@
         "Hello! Good to see you again! Your task list is uploaded.": "Здравствуйте! Рад снова видель вас! Ваш список задач загружен.",
         "Enter your timezone:": "Введите ваш часовой пояс:",
         "Try again. Enter your time zone:": "Попробуйте ещё раз. Введите ваш часовой пояс:",
-        "Enter your time zone. Example Los Angeles \"-8\", Moscow \"+3\":": "Введите свой часовой пояс. Пример Москва \"+3\", Иркутск \"+8\":",
+        "Enter your time zone. Example Los Angeles \"-8\", Moscow \"+3\":": "Введите свой часовой пояс. Пример: Москва \"+3\", Иркутск \"+8\":",
         "Account not found! Please register! To register, enter /start.": "Аккаунт не найден! Пожалуйста, зарегистрируйтесь! Для регистрации введите /start",
         "Press button:": "Нажмите кнопку:",
         "Is your time ": "Ваше время ",
@@ -49,6 +49,9 @@
         "Action canceled! Select an action:": "*Действие отменено!* Выберите действие:",
         "Yes, I really want to delete my account!": "Да, я действительно хочу удалить свой аккаунт!",
         "Your account has been deleted. Goodbye!": "Аккаунт удален. Досвидания!",
-        "Error deleting account. Try again!": "Ошибка удаления аккаунта. Попробуйте ещё раз!"
+        "Error deleting account. Try again!": "Ошибка удаления аккаунта. Попробуйте ещё раз!",
+        "Choose your language please:": "Выберите ваш язык пожалуйста:",
+        "Language has changed! Select an action:": "Язык изменен! Выберите действие:",
+        "Error changing language.Try again!": "Язык не изменен. Попробуйте ещё раз!"
     }
 }

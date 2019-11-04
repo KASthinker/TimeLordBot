@@ -125,3 +125,21 @@ func DeleteUserAccount(userID int64) error{
 
 	return nil
 }
+
+// ChangeLanguage ... 
+func ChangeLanguage(userID int64, lang string) error {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+	}
+	defer db.Close()
+	
+	strUserID := fmt.Sprintf("'%v'", userID)
+	_, err = db.Exec(fmt.Sprintf("UPDATE Users SET language='%v' WHERE user_id=%v", lang, strUserID))
+	if err != nil {
+		log.Printf("\n\nError in update line\n%v\n\n\n", err)
+		return err
+	}
+
+	return nil
+}
