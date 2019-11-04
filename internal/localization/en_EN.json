@@ -52,6 +52,9 @@
         "Error deleting account. Try again!": "Error deleting account. Try again!",
         "Choose your language please:": "Choose your language please:",
         "Language has changed! Select an action:": "Language has changed! Select an action:",
-        "Error changing language.Try again!": "Error changing language. Try again!"
+        "Error changing language.Try again!": "Error changing language. Try again!",
+        "Error changing timezone.Try again!": "Error changing timezone.Try again!",
+        "Error input timezone.Try again! Enter - /start": "Error input timezone.Try again! Enter - /start",
+        "The time zone has changed. Select an action:": "The time zone has changed. Select an action:"
     }
 }

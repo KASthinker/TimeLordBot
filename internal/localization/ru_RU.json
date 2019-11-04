@@ -52,6 +52,9 @@
         "Error deleting account. Try again!": "Ошибка удаления аккаунта. Попробуйте ещё раз!",
         "Choose your language please:": "Выберите ваш язык пожалуйста:",
         "Language has changed! Select an action:": "Язык изменен! Выберите действие:",
-        "Error changing language.Try again!": "Язык не изменен. Попробуйте ещё раз!"
+        "Error changing language.Try again!": "Язык не изменен. Попробуйте ещё раз!",
+        "Error changing timezone.Try again!": "Часовой пояс не изменен. Попробуйте ещё раз!",
+        "Error input timezone.Try again! Entert - /start": "Ошибка ввода часового пояса. Попробуйте ещё раз! Введите /start",
+        "The time zone has changed. Select an action:": "Часовой пояс изменен. Выберите действие!"
     }
 }

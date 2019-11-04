@@ -40,6 +40,16 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.ParseMode = "Markdown"
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		} else if user.Stage == "change_timezone_GPS" {
+			user.Stage = "change_timezone_1"
+			loctime, tz := methods.TimeZoneGPS(message.Location.Longitude, message.Location.Latitude)
+			user.Timezone = tz
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Is your time ") + fmt.Sprintf("*%v*?", loctime)
+			sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
+			sndMsg.ParseMode = "Markdown"
+			go data.Bot.Send(sndMsg)
+			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
 			user.Stage = ""
 		}
@@ -82,13 +92,30 @@ func MessageHandler(message *tgbotapi.Message) {
 		if user.Stage == "registration_3" {
 			err := db.NewUser(user, message.Chat.ID)
 			if err != nil {
-				sndMsg.Text = "База данных не доступна! /start"
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error input timezone.Try again! Enter - /start")
 				go data.Bot.Send(sndMsg)
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 				user.Stage = ""
 			} else {
 				sndMsg.Text = lang.TrMess(user.Language, typeText,
 					"Registration completed successfully. Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				user.Stage = ""
+			}
+		} else if user.Stage == "change_timezone_1" {
+			err := db.ChangeTimeZone(message.Chat.ID, user.Timezone)
+			if err != nil {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error changing timezone.Try again!")
+				sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+				go data.Bot.Send(sndMsg)
+				user.Stage = "change_timezone"
+			} else {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"The time zone has changed. Select an action:")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				go data.Bot.Send(sndMsg)
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
@@ -101,13 +128,30 @@ func MessageHandler(message *tgbotapi.Message) {
 		if user.Stage == "registration_3" {
 			err := db.NewUser(user, message.Chat.ID)
 			if err != nil {
-				sndMsg.Text = "База данных не доступна! /start"
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error input timezone.Try again! Enter - /start")
 				go data.Bot.Send(sndMsg)
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 				user.Stage = ""
 			} else {
 				sndMsg.Text = lang.TrMess(user.Language, typeText,
 					"Registration completed successfully. Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				user.Stage = ""
+			}
+		} else if user.Stage == "change_timezone_1" {
+			err := db.ChangeTimeZone(message.Chat.ID, user.Timezone)
+			if err != nil {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error changing timezone.Try again!")
+				sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+				go data.Bot.Send(sndMsg)
+				user.Stage = "change_timezone"
+			} else {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"The time zone has changed. Select an action:")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				go data.Bot.Send(sndMsg)
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
@@ -124,6 +168,13 @@ func MessageHandler(message *tgbotapi.Message) {
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			user.Stage = "registration_1"
+		} else if user.Stage == "change_timezone_1" {
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Try again. Enter your time zone:")
+			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+			go data.Bot.Send(sndMsg)
+			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			user.Stage = "change_timezone"
 		}
 	case "Нет":
 		if user.Stage == "registration_3" {
@@ -133,6 +184,13 @@ func MessageHandler(message *tgbotapi.Message) {
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			user.Stage = "registration_1"
+		} else if user.Stage == "change_timezone_1" {
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Try again. Enter your time zone:")
+			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+			go data.Bot.Send(sndMsg)
+			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			user.Stage = "change_timezone"
 		}
 	//-----------------------------------------------------------------\\
 
@@ -159,14 +217,36 @@ func MessageHandler(message *tgbotapi.Message) {
 	//-----------------------------------------------------------------\\
 	default:
 		if db.IfUserExists(message.Chat.ID) {
-			user.Stage = ""
-			data.Bot.DeleteMessage(
-				tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
-			sndMsg.Text = lang.TrMess(user.Language, typeText,
-				"I don't understand this command!")
-			sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
-			go data.Bot.Send(sndMsg)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			if user.Stage == "change_timezone_manually" {
+				// Manually change timezone
+				loctime, tz, err := methods.TimeZoneManually(message.Text)
+				if err != nil {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Incorrect time zone entered! Try again:")
+					sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+					user.Stage = "change_timezone"
+					go data.Bot.Send(sndMsg)
+					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				} else {
+					user.Timezone = tz
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Is your time ") + fmt.Sprintf("*%v*?", loctime)
+					sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+					user.Stage = "change_timezone_1"
+				}
+			} else {
+				user.Stage = ""
+				data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"I don't understand this command!")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			}
 		} else {
 			if user.Stage == "registration_2" {
 				// Manually input timezone
@@ -277,6 +357,11 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Enter your time zone. Example Los Angeles \"-8\", Moscow \"+3\":")
 			go data.Bot.Send(sndMsg)
+		} else if user.Stage == "change_timezone" {
+			user.Stage = "change_timezone_manually"
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Enter your time zone. Example Los Angeles \"-8\", Moscow \"+3\":")
+			go data.Bot.Send(sndMsg)
 		} else {
 			user.Stage = ""
 		}
@@ -286,6 +371,16 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 				tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, callback.Message.MessageID))
 			sndMsg := tgbotapi.NewMessage(message.Chat.ID, "") // ReplyMarcup can't change
 			user.Stage = "registration_2"
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Press button:")
+			sndMsg.ReplyMarkup = buttons.SendUserLocation(user.Language)
+			go data.Bot.Send(sndMsg)
+			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		} else if user.Stage == "change_timezone" {
+			data.Bot.DeleteMessage(
+				tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, callback.Message.MessageID))
+			sndMsg := tgbotapi.NewMessage(message.Chat.ID, "") // ReplyMarcup can't change
+			user.Stage = "change_timezone_GPS"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Press button:")
 			sndMsg.ReplyMarkup = buttons.SendUserLocation(user.Language)
@@ -312,7 +407,6 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			"Select an action:")
 		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 		go data.Bot.Send(sndMsg)
-
 	//Setting buttons
 	case "delete_my_account":
 		user.Stage = "delete_my_account_1"
@@ -328,6 +422,12 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Choose your language please:")
 		sndMsg.ReplyMarkup = buttons.Language()
+		go data.Bot.Send(sndMsg)
+	case "change_timezone":
+		user.Stage = "change_timezone"
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Enter your timezone:")
+		sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 		go data.Bot.Send(sndMsg)
 	}
 
