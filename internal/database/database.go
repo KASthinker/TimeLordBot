@@ -36,12 +36,12 @@ func Connect() (*sql.DB, error) {
 
 // IfUserExists ...
 func IfUserExists(userID int64) bool {
-	strUserID := fmt.Sprintf("'%v'", userID)
 	db, err = Connect()
 	if err != nil {
 		log.Println(err)
 	}
 	defer db.Close()
+	strUserID := fmt.Sprintf("'%v'", userID)
 	row := db.QueryRow(fmt.Sprintf("SHOW TABLES LIKE %v;", strUserID))
 	err = row.Scan()
 	if err == sql.ErrNoRows {
@@ -53,12 +53,12 @@ func IfUserExists(userID int64) bool {
 
 // NewUser ...
 func NewUser(user *data.UserData, userID int64) error {
-	strUserID := fmt.Sprintf("`%v`", userID)
 	db, err = Connect()
 	if err != nil {
 		log.Println(err)
 	}
 	defer db.Close()
+	strUserID := fmt.Sprintf("`%v`", userID)
 	_, err = db.Exec(fmt.Sprintf(`
 		CREATE TABLE %v (
 			id INT NOT NULL AUTO_INCREMENT,
@@ -100,4 +100,28 @@ func GetUserData(userID int64, user *data.UserData) {
 		log.Printf("\n\n\n%v\n\n\n", err)
 	}
 	log.Printf("\n\n\nOK-> %v:%v\n\n\n", user.Language, user.Timezone)
+}
+
+// DeleteUserAccount ...
+func DeleteUserAccount(userID int64) error{
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+	}
+	defer db.Close()
+	
+	strUserID := fmt.Sprintf("'%v'", userID)
+	_, err = db.Exec(fmt.Sprintf(`DELETE FROM Users WHERE user_id=%v;`, strUserID))
+	if err != nil {
+		log.Printf("\n\nError in delete line\n%v\n\n\n", err)
+		return err
+	}
+	strUserID = fmt.Sprintf("`%v`", userID)
+	_, err = db.Exec(fmt.Sprintf(`DROP TABLE %v;`, strUserID))
+	if err != nil {
+		log.Printf("\n\nError DROP TABLE\n%v\n\n\n", err)
+		return err
+	}
+
+	return nil
 }

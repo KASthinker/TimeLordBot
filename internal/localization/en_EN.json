@@ -43,6 +43,12 @@
         "Invalid command. Enter /start": "Invalid command. Enter /start",
         "Something went wrong. Enter /start": "Something went wrong. Enter /start",
         "Incorrect time zone entered! Try again:": "Incorrect time zone entered! Try again:",
-        "Select an action:": "Select an action:"
+        "Select an action:": "Select an action:",
+        "Select the type of new task:": "Select the type of new task:",
+        "If you really want to delete your account, enter without quotation marks: “Yes, I really want to delete my account!” This will permanently delete all your data!\nCancel - /cancel": "If you really want to delete your account, enter without quotation marks: _“Yes, I really want to delete my account!”_ *This will permanently delete all your data!*\n*Cancel* - /cancel",
+        "Action canceled! Select an action:": "*Action canceled!* Select an action:",
+        "Yes, I really want to delete my account!": "Yes, I really want to delete my account!",
+        "Your account has been deleted. Goodbye!": "Your account has been deleted. Goodbye!",
+        "Error deleting account. Try again!": "Error deleting account. Try again!"
     }
 }

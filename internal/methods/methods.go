@@ -22,8 +22,8 @@ func TimeZoneGPS(Longitude, Latitude float64) (loctime string, tz string) {
 	return loctime, tz
 }
 
-//TimeZoneManualy ...
-func TimeZoneManualy(strtz string) (loctime string, tz string, err error) {
+//TimeZoneManually ...
+func TimeZoneManually(strtz string) (loctime string, tz string, err error) {
 	inttz, err := strconv.Atoi(strtz)
 	if err != nil {
 		return "", "", err

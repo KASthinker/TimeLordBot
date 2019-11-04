@@ -28,9 +28,10 @@ func MessageHandler(message *tgbotapi.Message) {
 		}
 	}
 
+	// User location GPS
 	if message.Location != nil {
-		if user.Stage == 2 {
-			user.Stage = 3
+		if user.Stage == "registration_2" {
+			user.Stage = "registration_3"
 			loctime, tz := methods.TimeZoneGPS(message.Location.Longitude, message.Location.Latitude)
 			user.Timezone = tz
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
@@ -40,7 +41,7 @@ func MessageHandler(message *tgbotapi.Message) {
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
-			user.Stage = 0
+			user.Stage = ""
 		}
 		return
 	}
@@ -61,81 +62,119 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		}
 		return
+	case "cancel":
+		user.Stage = ""
+		data.Bot.DeleteMessage(
+			tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Action canceled! Select an action:")
+		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+		sndMsg.ParseMode = "Markdown"
+		go data.Bot.Send(sndMsg)
+		sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		return
 	}
 
+	// Registration Replay buttons
 	switch message.Text {
 	case "Yes":
-		if user.Stage == 3 {
+		if user.Stage == "registration_3" {
 			err := db.NewUser(user, message.Chat.ID)
 			if err != nil {
 				sndMsg.Text = "База данных не доступна! /start"
 				go data.Bot.Send(sndMsg)
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-				user.Stage = 0
+				user.Stage = ""
 			} else {
 				sndMsg.Text = lang.TrMess(user.Language, typeText,
 					"Registration completed successfully. Select an action:")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				go data.Bot.Send(sndMsg)
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-				user.Stage = 0
+				user.Stage = ""
 			}
 		} else {
-			user.Stage = 0
+			user.Stage = ""
 		}
 	case "Да":
-		if user.Stage == 3 {
+		if user.Stage == "registration_3" {
 			err := db.NewUser(user, message.Chat.ID)
 			if err != nil {
 				sndMsg.Text = "База данных не доступна! /start"
 				go data.Bot.Send(sndMsg)
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-				user.Stage = 0
+				user.Stage = ""
 			} else {
 				sndMsg.Text = lang.TrMess(user.Language, typeText,
 					"Registration completed successfully. Select an action:")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				go data.Bot.Send(sndMsg)
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-				user.Stage = 0
+				user.Stage = ""
 			}
 		} else {
-			user.Stage = 0
+			user.Stage = ""
 		}
 	case "No":
-		if user.Stage == 3 {
+		if user.Stage == "registration_3" {
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Try again. Enter your time zone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-			user.Stage = 1
+			user.Stage = "registration_1"
 		}
 	case "Нет":
-		if user.Stage == 3 {
+		if user.Stage == "registration_3" {
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Try again. Enter your time zone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-			user.Stage = 1
+			user.Stage = "registration_1"
 		}
-		
+	//-----------------------------------------------------------------\\
+
+	//Delete account
+	case lang.TrMess(user.Language, typeText,
+		"Yes, I really want to delete my account!"):
+		if user.Stage == "delete_my_account_1" {
+			err := db.DeleteUserAccount(message.Chat.ID)
+			if err != nil {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error deleting account. Try again!")
+				sndMsg.ReplyMarkup = buttons.StartButtons
+				go data.Bot.Send(sndMsg)
+				user.Stage = ""
+			} else {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Your account has been deleted. Goodbye!")
+				go data.Bot.Send(sndMsg)
+				user.Stage = ""
+			}
+		} else {
+			user.Stage = ""
+		}
+	//-----------------------------------------------------------------\\
 	default:
 		if db.IfUserExists(message.Chat.ID) {
+			user.Stage = ""
+			data.Bot.DeleteMessage(
+				tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"I don't understand this command!")
 			sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
-			if user.Stage == 2 {
-				loctime, tz, err := methods.TimeZoneManualy(message.Text)
+			if user.Stage == "registration_2" {
+				// Manually input timezone
+				loctime, tz, err := methods.TimeZoneManually(message.Text)
 				if err != nil {
 					sndMsg.Text = lang.TrMess(user.Language, typeText,
 						"Incorrect time zone entered! Try again:")
 					sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
-					user.Stage = 1
+					user.Stage = "registration_1"
 					go data.Bot.Send(sndMsg)
 					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 				} else {
@@ -146,7 +185,7 @@ func MessageHandler(message *tgbotapi.Message) {
 					sndMsg.ParseMode = "Markdown"
 					go data.Bot.Send(sndMsg)
 					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-					user.Stage = 3
+					user.Stage = "registration_3"
 				}
 			} else {
 				sndMsg.Text = lang.TrMess(user.Language, typeText,
@@ -175,54 +214,56 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			user.Language = "en_EN"
 		}
 	}
-
+	// Registration Inline buttons
 	switch callback.Data {
 	case "en_EN":
-		if user.Stage == 0 {
+		if user.Stage == "" {
 			user.Language = callback.Data
-			user.Stage = 1
+			user.Stage = "registration_1"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Enter your timezone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 			go data.Bot.Send(sndMsg)
 		} else {
-			user.Stage = 0
+			user.Stage = ""
 		}
 	case "ru_RU":
-		if user.Stage == 0 {
+		if user.Stage == "" {
 			user.Language = callback.Data
-			user.Stage = 1
+			user.Stage = "registration_1"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Enter your timezone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 			go data.Bot.Send(sndMsg)
 		} else {
-			user.Stage = 0
+			user.Stage = ""
 		}
 	case "input_timezone":
-		if user.Stage == 1 {
-			user.Stage = 2
+		if user.Stage == "registration_1" {
+			user.Stage = "registration_2"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Enter your time zone. Example Los Angeles \"-8\", Moscow \"+3\":")
 			go data.Bot.Send(sndMsg)
 		} else {
-			user.Stage = 0
+			user.Stage = ""
 		}
 	case "use_GPS":
-		if user.Stage == 1 {
+		if user.Stage == "registration_1" {
 			data.Bot.DeleteMessage(
 				tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, callback.Message.MessageID))
 			sndMsg := tgbotapi.NewMessage(message.Chat.ID, "") // ReplyMarcup can't change
-			user.Stage = 2
+			user.Stage = "registration_2"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Press button:")
 			sndMsg.ReplyMarkup = buttons.SendUserLocation(user.Language)
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
-			user.Stage = 0
+			user.Stage = ""
 		}
+	//-----------------------------------------------------------------\\
 
+	// Start buttons
 	case "menu":
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Select an action:")
@@ -237,6 +278,17 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Select an action:")
 		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+		go data.Bot.Send(sndMsg)
+
+	//Setting buttons
+	case "delete_my_account":
+		user.Stage = "delete_my_account_1"
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"If you really want to delete your account, enter without quotation marks: "+
+				"“Yes, I really want to delete my account!” "+
+				"This will permanently delete all your data!"+
+				"\nCancel - /cancel")
+		sndMsg.ParseMode = "Markdown"
 		go data.Bot.Send(sndMsg)
 	}
 

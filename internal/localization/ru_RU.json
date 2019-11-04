@@ -43,6 +43,12 @@
         "Invalid command. Enter /start": "Неверная команда. Введите /start",
         "Something went wrong. Enter /start": "Что то пошло не так. Введите /start",
         "Incorrect time zone entered! Try again:": "Введен неправильный часовой пояс! Попробуйте еще раз:",
-        "Select an action:": "Выберите действие:"
+        "Select an action:": "Выберите действие:",
+        "Select the type of new task:": "Выберите тип новой задачи:",
+        "If you really want to delete your account, enter without quotation marks: “Yes, I really want to delete my account!” This will permanently delete all your data!\nCancel - /cancel": "Если вы действительно хотите удалить свой аккаунт, введите без кавычек: _«Да, я действительно хочу удалить свой аккаунт!»_ *Это навсегда удалит все ваши данные!*\n*Отменить* - /cancel",
+        "Action canceled! Select an action:": "*Действие отменено!* Выберите действие:",
+        "Yes, I really want to delete my account!": "Да, я действительно хочу удалить свой аккаунт!",
+        "Your account has been deleted. Goodbye!": "Аккаунт удален. Досвидания!",
+        "Error deleting account. Try again!": "Ошибка удаления аккаунта. Попробуйте ещё раз!"
     }
 }

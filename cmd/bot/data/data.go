@@ -6,7 +6,7 @@ import (
 
 // UserData ...
 type UserData struct {
-	Stage    int
+	Stage    string
 	Language string
 	Timezone string
 }
