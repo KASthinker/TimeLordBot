@@ -42,6 +42,7 @@
         "Registration completed successfully. Select an action:": "Регистрация прошла успешно. Выберите действие:",
         "Invalid command. Enter /start": "Неверная команда. Введите /start",
         "Something went wrong. Enter /start": "Что то пошло не так. Введите /start",
-        "Incorrect time zone entered! Try again:": "Введен неправильный часовой пояс! Попробуйте еще раз:"
+        "Incorrect time zone entered! Try again:": "Введен неправильный часовой пояс! Попробуйте еще раз:",
+        "Select an action:": "Выберите действие:"
     }
 }

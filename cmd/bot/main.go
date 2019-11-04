@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	data.NewUserDataMap = make(map[int64]*data.NewUserData)
+	data.UserDataMap = make(map[int64]*data.UserData)
 	data.Bot, data.Err = tgbotapi.NewBotAPI(configs.GetToken())
 	if data.Err != nil {
 		log.Println(data.Err)

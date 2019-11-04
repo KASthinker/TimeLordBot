@@ -45,7 +45,7 @@ func Menu(lang string) *tgbotapi.InlineKeyboardMarkup {
 			tgbotapi.NewInlineKeyboardButtonData(
 				"👔 "+loc.TrMess(lang, typeText, "Groups"), "groups"),
 			tgbotapi.NewInlineKeyboardButtonData(
-				"🔙 "+loc.TrMess(lang, typeText, "Back"), "step_back"),
+				"🔙 "+loc.TrMess(lang, typeText, "Back"), "step_back_start"),
 		),
 	)
 	return &keyboard
@@ -70,7 +70,7 @@ func Settings(lang string) *tgbotapi.InlineKeyboardMarkup {
 			tgbotapi.NewInlineKeyboardButtonData(
 				"🕑 "+loc.TrMess(lang, typeText, "Language"), "change_language"),
 			tgbotapi.NewInlineKeyboardButtonData(
-				"🔙 "+loc.TrMess(lang, typeText, "Back"), "step_back"),
+				"🔙 "+loc.TrMess(lang, typeText, "Back"), "step_back_start"),
 		),
 	)
 	return &keyboard

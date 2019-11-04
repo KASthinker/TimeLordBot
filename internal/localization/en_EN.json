@@ -42,6 +42,7 @@
         "Registration completed successfully. Select an action:": "Registration completed successfully. Select an action:",
         "Invalid command. Enter /start": "Invalid command. Enter /start",
         "Something went wrong. Enter /start": "Something went wrong. Enter /start",
-        "Incorrect time zone entered! Try again:": "Incorrect time zone entered! Try again:"
+        "Incorrect time zone entered! Try again:": "Incorrect time zone entered! Try again:",
+        "Select an action:": "Select an action:"
     }
 }

@@ -4,16 +4,16 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// NewUserData ...
-type NewUserData struct {
+// UserData ...
+type UserData struct {
 	Stage    int
 	Language string
 	Timezone string
 }
 
 var (
-	// NewUserDataMap ...
-	NewUserDataMap map[int64]*NewUserData
+	// UserDataMap ...
+	UserDataMap map[int64]*UserData
 	// Bot ...
 	Bot     *tgbotapi.BotAPI
 	// Err ...

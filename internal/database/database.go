@@ -52,7 +52,7 @@ func IfUserExists(userID int64) bool {
 }
 
 // NewUser ...
-func NewUser(user *data.NewUserData, userID int64) error {
+func NewUser(user *data.UserData, userID int64) error {
 	strUserID := fmt.Sprintf("`%v`", userID)
 	db, err = Connect()
 	if err != nil {
@@ -86,7 +86,7 @@ func NewUser(user *data.NewUserData, userID int64) error {
 }
 
 // GetUserData ...
-func GetUserData(userID int64, user *data.NewUserData) {
+func GetUserData(userID int64, user *data.UserData) {
 	strUserID := fmt.Sprintf("'%v'", userID)
 	db, err = Connect()
 	if err != nil {

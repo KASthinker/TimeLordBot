@@ -15,15 +15,15 @@ import (
 func MessageHandler(message *tgbotapi.Message) {
 	typeText := "message"
 	sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
-	user, ok := data.NewUserDataMap[message.Chat.ID]
+	user, ok := data.UserDataMap[message.Chat.ID]
 	if !ok {
 		if db.IfUserExists(message.Chat.ID) {
-			data.NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
-			user = data.NewUserDataMap[message.Chat.ID]
+			data.UserDataMap[message.Chat.ID] = new(data.UserData)
+			user = data.UserDataMap[message.Chat.ID]
 			db.GetUserData(message.Chat.ID, user)
 		} else {
-			data.NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
-			user = data.NewUserDataMap[message.Chat.ID]
+			data.UserDataMap[message.Chat.ID] = new(data.UserData)
+			user = data.UserDataMap[message.Chat.ID]
 			user.Language = "en_EN"
 		}
 	}
@@ -62,6 +62,7 @@ func MessageHandler(message *tgbotapi.Message) {
 		}
 		return
 	}
+
 	switch message.Text {
 	case "Yes":
 		if user.Stage == 3 {
@@ -119,6 +120,7 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			user.Stage = 1
 		}
+		
 	default:
 		if db.IfUserExists(message.Chat.ID) {
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
@@ -128,7 +130,7 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
 			if user.Stage == 2 {
-				loctime, tz ,err := methods.TimeZoneManualy(message.Text)
+				loctime, tz, err := methods.TimeZoneManualy(message.Text)
 				if err != nil {
 					sndMsg.Text = lang.TrMess(user.Language, typeText,
 						"Incorrect time zone entered! Try again:")
@@ -161,15 +163,15 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	typeText := "message"
 	message := callback.Message
 	sndMsg := tgbotapi.NewEditMessageText(message.Chat.ID, message.MessageID, "")
-	user, ok := data.NewUserDataMap[message.Chat.ID]
+	user, ok := data.UserDataMap[message.Chat.ID]
 	if !ok {
 		if db.IfUserExists(message.Chat.ID) {
-			data.NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
-			user = data.NewUserDataMap[message.Chat.ID]
+			data.UserDataMap[message.Chat.ID] = new(data.UserData)
+			user = data.UserDataMap[message.Chat.ID]
 			db.GetUserData(message.Chat.ID, user)
 		} else {
-			data.NewUserDataMap[message.Chat.ID] = new(data.NewUserData)
-			user = data.NewUserDataMap[message.Chat.ID]
+			data.UserDataMap[message.Chat.ID] = new(data.UserData)
+			user = data.UserDataMap[message.Chat.ID]
 			user.Language = "en_EN"
 		}
 	}
@@ -211,7 +213,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			data.Bot.DeleteMessage(
 				tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, callback.Message.MessageID))
 			sndMsg := tgbotapi.NewMessage(message.Chat.ID, "") // ReplyMarcup can't change
-			user.Stage = 2                                     // 2
+			user.Stage = 2
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Press button:")
 			sndMsg.ReplyMarkup = buttons.SendUserLocation(user.Language)
@@ -220,6 +222,22 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		} else {
 			user.Stage = 0
 		}
+
+	case "menu":
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Select an action:")
+		sndMsg.ReplyMarkup = buttons.Menu(user.Language)
+		go data.Bot.Send(sndMsg)
+	case "setting":
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Select an action:")
+		sndMsg.ReplyMarkup = buttons.Settings(user.Language)
+		go data.Bot.Send(sndMsg)
+	case "step_back_start":
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Select an action:")
+		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+		go data.Bot.Send(sndMsg)
 	}
 
 }
