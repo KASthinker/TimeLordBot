@@ -6,16 +6,17 @@ import (
 
 // UserData ...
 type UserData struct {
-	Stage    string
-	Language string
-	Timezone string
+	Stage      string
+	Language   string
+	Timezone   string
+	TimeFormat int
 }
 
 var (
 	// UserDataMap ...
 	UserDataMap map[int64]*UserData
 	// Bot ...
-	Bot     *tgbotapi.BotAPI
+	Bot *tgbotapi.BotAPI
 	// Err ...
-	Err     error
+	Err error
 )

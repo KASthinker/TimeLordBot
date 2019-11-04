@@ -75,8 +75,8 @@ func NewUser(user *data.UserData, userID int64) error {
 		return err
 	}
 	_, err = db.Exec(fmt.Sprintf(`
-		INSERT INTO Users (user_id, language, timezone) 
-		VALUES (%v, '%v', '%v');`, userID, user.Language, user.Timezone))
+		INSERT INTO Users (user_id, language, timezone, time_format) 
+		VALUES (%v, '%v', '%v', '%v');`, userID, user.Language, user.Timezone, user.TimeFormat))
 	if err != nil {
 		log.Printf("\n\nError in insert line\n%v\n\n\n", err)
 		return err
@@ -94,12 +94,12 @@ func GetUserData(userID int64, user *data.UserData) {
 	}
 	defer db.Close()
 	row := db.QueryRow(fmt.Sprintf(
-		"SELECT language, timezone FROM Users WHERE user_id=%v", strUserID))
-	err = row.Scan(&user.Language, &user.Timezone)
+		"SELECT language, timezone, time_format FROM Users WHERE user_id=%v", strUserID))
+	err = row.Scan(&user.Language, &user.Timezone, &user.TimeFormat)
 	if err == sql.ErrNoRows {
 		log.Printf("\n\n\n%v\n\n\n", err)
 	}
-	log.Printf("\n\n\nOK-> %v:%v\n\n\n", user.Language, user.Timezone)
+	log.Printf("\n\n\nOK-> %v:%v:%v\n\n\n", user.Language, user.Timezone,user.TimeFormat)
 }
 
 // DeleteUserAccount ...
@@ -154,6 +154,24 @@ func ChangeTimeZone(userID int64, tz string) error {
 	
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(fmt.Sprintf("UPDATE Users SET timezone='%v' WHERE user_id=%v", tz, strUserID))
+	if err != nil {
+		log.Printf("\n\nError in update line\n%v\n\n\n", err)
+		return err
+	}
+
+	return nil
+}
+
+// ChangeTimeFormat ...
+func ChangeTimeFormat(userID int64, tf int) error {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+	}
+	defer db.Close()
+	
+	strUserID := fmt.Sprintf("'%v'", userID)
+	_, err = db.Exec(fmt.Sprintf("UPDATE Users SET time_format='%v' WHERE user_id=%v", tf, strUserID))
 	if err != nil {
 		log.Printf("\n\nError in update line\n%v\n\n\n", err)
 		return err

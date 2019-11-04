@@ -35,7 +35,8 @@ func main() {
 			user_id INT NOT NULL,
 			language VARCHAR(6) NOT NULL,
             type_account VARCHAR(6) DEFAULT 'User',
-            timezone VARCHAR(3) NOT NULL,
+			timezone VARCHAR(3) NOT NULL,
+			time_format INT NOT NULL,
             group_id VARCHAR(255),
             PRIMARY KEY (user_id)
 		);`)
@@ -50,6 +51,7 @@ func main() {
 			id INT NOT NULL AUTO_INCREMENT,
 			group_name VARCHAR(255) NOT NULL,
 			group_timezone VARCHAR(3) NOT NULL,
+			time_format INT NOT NULL,
 			creator INT NOT NULL,
 			PRIMARY KEY (id)
 		);`)

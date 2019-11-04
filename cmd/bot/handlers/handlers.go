@@ -32,7 +32,7 @@ func MessageHandler(message *tgbotapi.Message) {
 	if message.Location != nil {
 		if user.Stage == "registration_2" {
 			user.Stage = "registration_3"
-			loctime, tz := methods.TimeZoneGPS(message.Location.Longitude, message.Location.Latitude)
+			loctime, tz := methods.TimeZoneGPS(message.Location.Longitude, message.Location.Latitude, user.TimeFormat)
 			user.Timezone = tz
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Is your time ") + fmt.Sprintf("*%v*?", loctime)
@@ -42,7 +42,7 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else if user.Stage == "change_timezone_GPS" {
 			user.Stage = "change_timezone_1"
-			loctime, tz := methods.TimeZoneGPS(message.Location.Longitude, message.Location.Latitude)
+			loctime, tz := methods.TimeZoneGPS(message.Location.Longitude, message.Location.Latitude, user.TimeFormat)
 			user.Timezone = tz
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Is your time ") + fmt.Sprintf("*%v*?", loctime)
@@ -219,7 +219,7 @@ func MessageHandler(message *tgbotapi.Message) {
 		if db.IfUserExists(message.Chat.ID) {
 			if user.Stage == "change_timezone_manually" {
 				// Manually change timezone
-				loctime, tz, err := methods.TimeZoneManually(message.Text)
+				loctime, tz, err := methods.TimeZoneManually(message.Text, user.TimeFormat)
 				if err != nil {
 					sndMsg.Text = lang.TrMess(user.Language, typeText,
 						"Incorrect time zone entered! Try again:")
@@ -250,7 +250,7 @@ func MessageHandler(message *tgbotapi.Message) {
 		} else {
 			if user.Stage == "registration_2" {
 				// Manually input timezone
-				loctime, tz, err := methods.TimeZoneManually(message.Text)
+				loctime, tz, err := methods.TimeZoneManually(message.Text, user.TimeFormat)
 				if err != nil {
 					sndMsg.Text = lang.TrMess(user.Language, typeText,
 						"Incorrect time zone entered! Try again:")
@@ -300,10 +300,10 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	case "en_EN":
 		if user.Stage == "reg_language" {
 			user.Language = callback.Data
-			user.Stage = "registration_1"
+			user.Stage = "reg_time_format"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
-				"Enter your timezone:")
-			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+				"Enter the time format:")
+			sndMsg.ReplyMarkup = buttons.TimeFormat(user.Language)
 			go data.Bot.Send(sndMsg)
 		} else if user.Stage == "change_language" {
 			err := db.ChangeLanguage(callback.Message.Chat.ID, callback.Data)
@@ -327,10 +327,10 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	case "ru_RU":
 		if user.Stage == "reg_language" {
 			user.Language = callback.Data
-			user.Stage = "registration_1"
+			user.Stage = "reg_time_format"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
-				"Enter your timezone:")
-			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+				"Enter the time format:")
+			sndMsg.ReplyMarkup = buttons.TimeFormat(user.Language)
 			go data.Bot.Send(sndMsg)
 		} else if user.Stage == "change_language" {
 			err := db.ChangeLanguage(callback.Message.Chat.ID, callback.Data)
@@ -389,6 +389,56 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		} else {
 			user.Stage = ""
 		}
+	case "12_hour_clock":
+		if user.Stage == "reg_time_format" {
+			user.Stage = "registration_1"
+			user.TimeFormat = 12
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Enter your timezone:")
+			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+			go data.Bot.Send(sndMsg)
+		} else if user.Stage == "change_time_format" {
+			user.TimeFormat = 12
+			err := db.ChangeTimeFormat(message.Chat.ID, user.TimeFormat)
+			if err != nil {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error changing time format.Try again!")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				user.Stage = ""
+			} else {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"The time format has changed. Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				user.Stage = ""
+			}
+		}
+	case "24_hour_clock":
+		if user.Stage == "reg_time_format" {
+			user.Stage = "registration_1"
+			user.TimeFormat = 24
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Enter your timezone:")
+			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+			go data.Bot.Send(sndMsg)
+		} else if user.Stage == "change_time_format" {
+			user.TimeFormat = 24
+			err := db.ChangeTimeFormat(message.Chat.ID, user.TimeFormat)
+			if err != nil {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error changing time format.Try again!")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				user.Stage = ""
+			} else {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"The time format has changed. Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				user.Stage = ""
+			}
+		}
 	//-----------------------------------------------------------------\\
 
 	// Start buttons
@@ -428,6 +478,12 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Enter your timezone:")
 		sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+		go data.Bot.Send(sndMsg)
+	case "change_time_format":
+		user.Stage = "change_time_format"
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Enter the time format:")
+		sndMsg.ReplyMarkup = buttons.TimeFormat(user.Language)
 		go data.Bot.Send(sndMsg)
 	}
 

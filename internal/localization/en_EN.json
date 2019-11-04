@@ -27,7 +27,9 @@
         "Delegate": "Delegate",
         "Eliminate": "Eliminate",
         "Yes": "Yes",
-        "No": "No"
+        "No": "No",
+        "12-hour clock": "12-hour clock",
+        "24-hour clock": "24-hour clock"
     },
     "message":{
         "I don't understand this command!": "I don't understand this command!",
@@ -39,22 +41,25 @@
         "Account not found! Please register! To register, enter /start.": "Account not found! Please register! To register, enter /start.",
         "Press button:": "Press button:",
         "Is your time ": "Is your time ",
-        "Registration completed successfully. Select an action:": "Registration completed successfully. Select an action:",
+        "Registration completed successfully. Select an action:": "Registration completed successfully. In the settings you can change the time format.\nSelect an action:",
         "Invalid command. Enter /start": "Invalid command. Enter /start",
         "Something went wrong. Enter /start": "Something went wrong. Enter /start",
         "Incorrect time zone entered! Try again:": "Incorrect time zone entered! Try again:",
         "Select an action:": "Select an action:",
-        "Select the type of new task:": "Select the type of new task:",
         "If you really want to delete your account, enter without quotation marks: “Yes, I really want to delete my account!” This will permanently delete all your data!\nCancel - /cancel": "If you really want to delete your account, enter without quotation marks: _“Yes, I really want to delete my account!”_ *This will permanently delete all your data!*\n*Cancel* - /cancel",
         "Action canceled! Select an action:": "*Action canceled!* Select an action:",
         "Yes, I really want to delete my account!": "Yes, I really want to delete my account!",
         "Your account has been deleted. Goodbye!": "Your account has been deleted. Goodbye!",
         "Error deleting account. Try again!": "Error deleting account. Try again!",
         "Choose your language please:": "Choose your language please:",
-        "Language has changed! Select an action:": "Language has changed! Select an action:",
+        "Language has changed! Select an action:": "The language has changed! Select an action:",
         "Error changing language.Try again!": "Error changing language. Try again!",
         "Error changing timezone.Try again!": "Error changing timezone.Try again!",
         "Error input timezone.Try again! Enter - /start": "Error input timezone.Try again! Enter - /start",
-        "The time zone has changed. Select an action:": "The time zone has changed. Select an action:"
+        "The time zone has changed. Select an action:": "The timezone has changed. Select an action:",
+        "Enter the time format:": "Enter the time format:",
+        "Select the type of new task:": "Select the type of new task:",
+        "Error changing time format.Try again!": "Error changing time format.Try again!",
+        "The time format has changed. Select an action:": "The time format has changed. Select an action:"
     }
 }

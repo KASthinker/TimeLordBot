@@ -60,7 +60,7 @@ func Settings(lang string) *tgbotapi.InlineKeyboardMarkup {
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				"🕑 "+loc.TrMess(lang, typeText, "Time format"), "change_format_time"),
+				"🕑 "+loc.TrMess(lang, typeText, "Time format"), "change_time_format"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
@@ -68,9 +68,24 @@ func Settings(lang string) *tgbotapi.InlineKeyboardMarkup {
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				"🕑 "+loc.TrMess(lang, typeText, "Language"), "change_language"),
+				"🏳️ "+loc.TrMess(lang, typeText, "Language"), "change_language"),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"🔙 "+loc.TrMess(lang, typeText, "Back"), "step_back_start"),
+		),
+	)
+	return &keyboard
+}
+
+// TimeFormat ...
+func TimeFormat(lang string) *tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🕑 "+loc.TrMess(lang, typeText, "12-hour clock"), "12_hour_clock"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				"🕤 "+loc.TrMess(lang, typeText, "24-hour clock"), "24_hour_clock"),
 		),
 	)
 	return &keyboard
