@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 	"github.com/KASthinker/TimeLordBot/configs"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // Users ...
@@ -69,7 +69,7 @@ func NewUser(user *data.UserData, userID int64) error {
 			weekday VARCHAR(70),
 			priority VARCHAR(20) NOT NULL,
 			PRIMARY KEY (id)
-		);`,strUserID))
+		);`, strUserID))
 	if err != nil {
 		log.Printf("\n\nError in add User table\n%v\n\n\n", err)
 		return err
@@ -99,17 +99,17 @@ func GetUserData(userID int64, user *data.UserData) {
 	if err == sql.ErrNoRows {
 		log.Printf("\n\n\n%v\n\n\n", err)
 	}
-	log.Printf("\n\n\nOK-> %v:%v:%v\n\n\n", user.Language, user.Timezone,user.TimeFormat)
+	log.Printf("\n\n\nOK-> %v:%v:%v\n\n\n", user.Language, user.Timezone, user.TimeFormat)
 }
 
 // DeleteUserAccount ...
-func DeleteUserAccount(userID int64) error{
+func DeleteUserAccount(userID int64) error {
 	db, err = Connect()
 	if err != nil {
 		log.Println(err)
 	}
 	defer db.Close()
-	
+
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(fmt.Sprintf(`DELETE FROM Users WHERE user_id=%v;`, strUserID))
 	if err != nil {
@@ -126,14 +126,14 @@ func DeleteUserAccount(userID int64) error{
 	return nil
 }
 
-// ChangeLanguage ... 
+// ChangeLanguage ...
 func ChangeLanguage(userID int64, lang string) error {
 	db, err = Connect()
 	if err != nil {
 		log.Println(err)
 	}
 	defer db.Close()
-	
+
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(fmt.Sprintf("UPDATE Users SET language='%v' WHERE user_id=%v", lang, strUserID))
 	if err != nil {
@@ -151,7 +151,7 @@ func ChangeTimeZone(userID int64, tz string) error {
 		log.Println(err)
 	}
 	defer db.Close()
-	
+
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(fmt.Sprintf("UPDATE Users SET timezone='%v' WHERE user_id=%v", tz, strUserID))
 	if err != nil {
@@ -169,7 +169,7 @@ func ChangeTimeFormat(userID int64, tf int) error {
 		log.Println(err)
 	}
 	defer db.Close()
-	
+
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(fmt.Sprintf("UPDATE Users SET time_format='%v' WHERE user_id=%v", tf, strUserID))
 	if err != nil {

@@ -27,6 +27,13 @@ func MessageHandler(message *tgbotapi.Message) {
 			user.Language = "en_EN"
 		}
 	}
+	task, ok := data.TasksMap[message.Chat.ID]
+	if !ok {
+		if db.IfUserExists(message.Chat.ID) {
+			data.TasksMap[message.Chat.ID] = new(data.Task)
+			task = data.TasksMap[message.Chat.ID]
+		}
+	}
 
 	// User location GPS
 	if message.Location != nil {
@@ -75,7 +82,7 @@ func MessageHandler(message *tgbotapi.Message) {
 		return
 	case "cancel":
 		user.Stage = ""
-		data.Bot.DeleteMessage(
+		go data.Bot.DeleteMessage(
 			tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Action canceled! Select an action:")
@@ -237,9 +244,106 @@ func MessageHandler(message *tgbotapi.Message) {
 					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 					user.Stage = "change_timezone_1"
 				}
+			} else if user.Stage == "new_task_text" {
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+				task.Text = message.Text
+				user.Stage = "new_task_time"
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Enter the notification time:")
+				sndMsg.ParseMode = "Markdown"
+				go data.Bot.Send(sndMsg)
+			} else if user.Stage == "new_task_time" {
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+				if methods.CheckTime(message.Text) != nil {
+					user.Stage = "new_task_time"
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Incorrect time entered. Try again.")
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+				} else {
+					task.Time = message.Text
+					if task.TypeTask == "Everyday" {
+						user.Stage = "new_task_weekday"
+						sndMsg.Text = lang.TrMess(user.Language, typeText,
+							"Enter weeks numbers separated by commas:")
+						sndMsg.ParseMode = "Markdown"
+						go data.Bot.Send(sndMsg)
+					} else {
+						user.Stage = "new_task_date"
+						sndMsg.Text = lang.TrMess(user.Language, typeText,
+							"Enter the date of notification:")
+						sndMsg.ParseMode = "Markdown"
+						go data.Bot.Send(sndMsg)
+					}
+				}
+			} else if user.Stage == "new_task_date" {
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+				date, err := methods.CheckDate(message.Text)
+				if err != nil {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Incorrect date entered. Try again.")
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+				} else {
+					task.Date = date
+					user.Stage = "new_task_priority"
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Choose priority:")
+					sndMsg.ParseMode = "Markdown"
+					sndMsg.ReplyMarkup = buttons.Priority(user.Language)
+					go data.Bot.Send(sndMsg)
+				}
+			} else if user.Stage == "new_task_weekday" {
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+				weekday := methods.CheckWeekday(message.Text)
+				if len(weekday) > 0 {
+					task.WeekDay = weekday
+					user.Stage = "new_task_priority"
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Choose priority:")
+					sndMsg.ParseMode = "Markdown"
+					sndMsg.ReplyMarkup = buttons.Priority(user.Language)
+					go data.Bot.Send(sndMsg)
+				} else {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Weeks numbers are not entered correctly. Try again.")
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+				}
+			} else if user.Stage == "new_task_priority" {
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+				priority := ""
+				ok := false
+				if user.Language == "ru_RU" {
+					priority, ok = data.Priority[message.Text]
+				} else if user.Language == "en_EN" {
+					priority = lang.TrMess(user.Language, "buttons", message.Text)
+					if len(priority) > 0 {
+						ok = true
+					}
+				}
+				if ok {
+					task.Priority = priority
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Task added. Select an action:") + task.GetTask(user.Language)
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+				} else {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Priority entered incorrectly. Try again.")
+					sndMsg.ReplyMarkup = buttons.Priority(user.Language)
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+				}
 			} else {
 				user.Stage = ""
-				data.Bot.DeleteMessage(
+				go data.Bot.DeleteMessage(
 					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
 				sndMsg.Text = lang.TrMess(user.Language, typeText,
 					"I don't understand this command!")
@@ -295,6 +399,14 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			user.Language = "en_EN"
 		}
 	}
+	task, ok := data.TasksMap[message.Chat.ID]
+	if !ok {
+		if db.IfUserExists(message.Chat.ID) {
+			data.TasksMap[message.Chat.ID] = new(data.Task)
+			task = data.TasksMap[message.Chat.ID]
+		}
+	}
+
 	// Registration Inline buttons
 	switch callback.Data {
 	case "en_EN":
@@ -367,7 +479,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		}
 	case "use_GPS":
 		if user.Stage == "registration_1" {
-			data.Bot.DeleteMessage(
+			go data.Bot.DeleteMessage(
 				tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, callback.Message.MessageID))
 			sndMsg := tgbotapi.NewMessage(message.Chat.ID, "") // ReplyMarcup can't change
 			user.Stage = "registration_2"
@@ -377,7 +489,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else if user.Stage == "change_timezone" {
-			data.Bot.DeleteMessage(
+			go data.Bot.DeleteMessage(
 				tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, callback.Message.MessageID))
 			sndMsg := tgbotapi.NewMessage(message.Chat.ID, "") // ReplyMarcup can't change
 			user.Stage = "change_timezone_GPS"
@@ -457,6 +569,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			"Select an action:")
 		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 		go data.Bot.Send(sndMsg)
+
 	//Setting buttons
 	case "delete_my_account":
 		user.Stage = "delete_my_account_1"
@@ -484,6 +597,55 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Enter the time format:")
 		sndMsg.ReplyMarkup = buttons.TimeFormat(user.Language)
+		go data.Bot.Send(sndMsg)
+
+	// Menu buttons
+	case "new_task":
+		user.Stage = "new_task"
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Select the type of new task:")
+		sndMsg.ReplyMarkup = buttons.TypeTasks(user.Language)
+		go data.Bot.Send(sndMsg)
+
+	// Type Task buttons
+	case "common_task":
+		if user.Stage == "new_task" {
+			task.TypeTask = "Common"
+			user.Stage = "new_task_text"
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Enter the task text:")
+			sndMsg.ParseMode = "Markdown"
+			go data.Bot.Send(sndMsg)
+		} else {
+			user.Stage = ""
+		}
+	case "everyday_task":
+		if user.Stage == "new_task" {
+			task.TypeTask = "Everyday"
+			user.Stage = "new_task_text"
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Enter the task text:")
+			sndMsg.ParseMode = "Markdown"
+			go data.Bot.Send(sndMsg)
+		} else {
+			user.Stage = ""
+		}
+	case "holiday_task":
+		if user.Stage == "new_task" {
+			task.TypeTask = "Holiday"
+			user.Stage = "new_task_text"
+			sndMsg.Text = lang.TrMess(user.Language, typeText,
+				"Enter the task text:")
+			sndMsg.ParseMode = "Markdown"
+			go data.Bot.Send(sndMsg)
+		} else {
+			user.Stage = ""
+		}
+	case "step_back_menu":
+		user.Stage = ""
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Select an action:")
+		sndMsg.ReplyMarkup = buttons.Menu(user.Language)
 		go data.Bot.Send(sndMsg)
 	}
 

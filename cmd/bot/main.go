@@ -11,6 +11,7 @@ import (
 
 func init() {
 	data.UserDataMap = make(map[int64]*data.UserData)
+	data.TasksMap = make(map[int64]*data.Task)
 	data.Bot, data.Err = tgbotapi.NewBotAPI(configs.GetToken())
 	if data.Err != nil {
 		log.Println(data.Err)

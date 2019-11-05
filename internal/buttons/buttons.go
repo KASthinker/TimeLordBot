@@ -108,7 +108,7 @@ func TypeTasks(lang string) *tgbotapi.InlineKeyboardMarkup {
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				"🔙 "+loc.TrMess(lang, typeText, "Back"), "step_back"),
+				"🔙 "+loc.TrMess(lang, typeText, "Back"), "step_back_menu"),
 		),
 	)
 	return &keyboard
@@ -194,7 +194,6 @@ func YesORNot(lang string) *tgbotapi.ReplyKeyboardMarkup {
 	keyboard.OneTimeKeyboard = true
 	return &keyboard
 }
-
 
 // Language ...
 func Language() *tgbotapi.InlineKeyboardMarkup {
