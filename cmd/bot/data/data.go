@@ -71,7 +71,7 @@ func (task *Task) GetTask(language string) string {
 		temp := lang.TrMess(language, typeText, "Task:") + task.Text + "\n" +
 			lang.TrMess(language, typeText, "Time:") + task.Time + "\n" +
 			lang.TrMess(language, typeText, "Weekdays:") + wkd + "\n" +
-			lang.TrMess(language, typeText, "Priority:") + priority
+			lang.TrMess(language, typeText, "Priority:") + priority + "\n"
 
 		return temp
 	}
@@ -79,7 +79,7 @@ func (task *Task) GetTask(language string) string {
 	temp := lang.TrMess(language, typeText, "Task:") + task.Text + "\n" +
 		lang.TrMess(language, typeText, "Time:") + task.Time + "\n" +
 		lang.TrMess(language, typeText, "Date:") + date + "\n" +
-		lang.TrMess(language, typeText, "Priority:") + priority
+		lang.TrMess(language, typeText, "Priority:") + priority + "\n"
 
 	return temp
 }

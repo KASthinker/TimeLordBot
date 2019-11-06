@@ -15,6 +15,8 @@ import (
 func MessageHandler(message *tgbotapi.Message) {
 	typeText := "message"
 	sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+	sndMsg.ParseMode = "Markdown"
+	sndMsg.DisableNotification = true
 	user, ok := data.UserDataMap[message.Chat.ID]
 	if !ok {
 		if db.IfUserExists(message.Chat.ID) {
@@ -339,7 +341,8 @@ func MessageHandler(message *tgbotapi.Message) {
 						go data.Bot.Send(sndMsg)
 					} else {
 						sndMsg.Text = lang.TrMess(user.Language, typeText,
-							"Task added. Select an action:") + task.GetTask(user.Language)
+							"Task added:") + task.GetTask(user.Language) + 
+							lang.TrMess(user.Language, typeText, "Select an action:")
 						sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 						sndMsg.ParseMode = "Markdown"
 						go data.Bot.Send(sndMsg)
@@ -405,6 +408,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	typeText := "message"
 	message := callback.Message
 	sndMsg := tgbotapi.NewEditMessageText(message.Chat.ID, message.MessageID, "")
+	sndMsg.ParseMode = "Markdown"
 	user, ok := data.UserDataMap[message.Chat.ID]
 	if !ok {
 		if db.IfUserExists(message.Chat.ID) {
@@ -575,16 +579,19 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	case "menu":
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Select an action:")
+		sndMsg.ParseMode = "Markdown"
 		sndMsg.ReplyMarkup = buttons.Menu(user.Language)
 		go data.Bot.Send(sndMsg)
 	case "setting":
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Select an action:")
+		sndMsg.ParseMode = "Markdown"
 		sndMsg.ReplyMarkup = buttons.Settings(user.Language)
 		go data.Bot.Send(sndMsg)
 	case "step_back_start":
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Select an action:")
+		sndMsg.ParseMode = "Markdown"
 		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 		go data.Bot.Send(sndMsg)
 
@@ -663,6 +670,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		user.Stage = ""
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Select an action:")
+		sndMsg.ParseMode = "Markdown"
 		sndMsg.ReplyMarkup = buttons.Menu(user.Language)
 		go data.Bot.Send(sndMsg)
 	}
