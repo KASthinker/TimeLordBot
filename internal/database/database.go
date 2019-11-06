@@ -64,7 +64,7 @@ func NewUser(user *data.UserData, userID int64) error {
 			id INT NOT NULL AUTO_INCREMENT,
 			type_task VARCHAR(15) NOT NULL,
 			text VARCHAR(255) NOT NULL,
-			date DATE,
+			date VARCHAR(10),
 			time TIME NOT NULL,
 			weekday VARCHAR(70),
 			priority VARCHAR(20) NOT NULL,
@@ -177,5 +177,25 @@ func ChangeTimeFormat(userID int64, tf int) error {
 		return err
 	}
 
+	return nil
+}
+
+//AddNewTask ...
+func AddNewTask(userID int64, task *data.Task) error {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+	}
+	defer db.Close()
+
+	strUserID := fmt.Sprintf("`%v`", userID)
+	_, err = db.Exec(fmt.Sprintf(`
+		INSERT INTO %v (type_task, text, time, date, weekday, priority) 
+		VALUES ('%v','%v','%v','%v','%v','%v');`, strUserID, task.TypeTask, task.Text,
+									  task.Time, task.Date, task.WeekDay, task.Priority))
+	if err != nil {
+		log.Printf("\n\nError in insert line\n%v\n\n\n", err)
+		return err
+	}
 	return nil
 }

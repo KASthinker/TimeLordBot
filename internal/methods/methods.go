@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	"sort"
 	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 	"github.com/bradfitz/latlong"
 )
@@ -126,6 +126,7 @@ func CheckWeekday(weekday string) string {
 	}
 
 	temp = removeDuplicates(temp)
+	sort.Strings(temp)
 	str := strings.Join(temp[:], ",")
 
 	if len(temp) > 0 {

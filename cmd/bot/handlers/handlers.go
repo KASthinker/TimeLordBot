@@ -328,12 +328,23 @@ func MessageHandler(message *tgbotapi.Message) {
 					}
 				}
 				if ok {
+					user.Stage = ""
 					task.Priority = priority
-					sndMsg.Text = lang.TrMess(user.Language, typeText,
-						"Task added. Select an action:") + task.GetTask(user.Language)
-					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
-					sndMsg.ParseMode = "Markdown"
-					go data.Bot.Send(sndMsg)
+					err := db.AddNewTask(message.Chat.ID, task)
+					if err != nil {
+						sndMsg.Text = lang.TrMess(user.Language, typeText,
+							"Failed to add task. Try again.")
+						sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+						sndMsg.ParseMode = "Markdown"
+						go data.Bot.Send(sndMsg)
+					} else {
+						sndMsg.Text = lang.TrMess(user.Language, typeText,
+							"Task added. Select an action:") + task.GetTask(user.Language)
+						sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+						sndMsg.ParseMode = "Markdown"
+						go data.Bot.Send(sndMsg)
+					}
+					data.TasksMap[message.Chat.ID] = new(data.Task)
 				} else {
 					sndMsg.Text = lang.TrMess(user.Language, typeText,
 						"Priority entered incorrectly. Try again.")
@@ -342,6 +353,7 @@ func MessageHandler(message *tgbotapi.Message) {
 					go data.Bot.Send(sndMsg)
 				}
 			} else {
+				data.TasksMap[message.Chat.ID] = new(data.Task)
 				user.Stage = ""
 				go data.Bot.DeleteMessage(
 					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
@@ -381,6 +393,12 @@ func MessageHandler(message *tgbotapi.Message) {
 		}
 	}
 }
+
+
+
+
+
+
 
 // CallbackHandler ...
 func CallbackHandler(callback *tgbotapi.CallbackQuery) {

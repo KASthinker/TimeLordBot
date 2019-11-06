@@ -35,8 +35,17 @@
         "Task:": "📜 *Task:* ",
         "Time:": "⌛️ *Time:* ",
         "Date:": "📅 *Date:* ",
-        "Weekdays": "🗓 *Weekdays:* ",
+        "Weekdays:": "🗓 *Weekdays:* ",
         "Priority:": "🔥 *Priority:* "
+    },
+    "weekday":{
+        "Monday": "Monday",
+        "Tuesday": "Tuesday",
+        "Wednesday": "Wednesday",
+        "Thursday": "Thursday",
+        "Friday": "Friday",
+        "Saturday": "Saturday",
+        "Sunday": "Sunday"
     },
     "message":{
         "I don't understand this command!": "I don't understand this command!",
@@ -78,6 +87,7 @@
         "Weeks numbers are not entered correctly. Try again.": "Weeks numbers are not entered correctly. Try again.\n*Cancel* - /cancel",
         "Priority entered incorrectly. Try again.": "Priority entered incorrectly. Try again.\n*Cancel* - /cancel",
         "Task added. Select an action:": "Task added. Select an action:\n",
+        "Failed to add task. Try again.": "Failed to add task. Try again.",
         "": ""
     }
 }

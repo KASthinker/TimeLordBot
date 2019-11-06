@@ -29,13 +29,13 @@ var (
 
 //Weekday ...
 var Weekday = map[string]time.Weekday{
-	"1": time.Sunday,
-	"2": time.Monday,
-	"3": time.Tuesday,
-	"4": time.Wednesday,
-	"5": time.Thursday,
-	"6": time.Friday,
-	"7": time.Saturday,
+	"1": time.Monday,
+	"2": time.Tuesday,
+	"3": time.Wednesday,
+	"4": time.Thursday,
+	"5": time.Friday,
+	"6": time.Saturday,
+	"7": time.Sunday,
 }
 
 // Priority ...
@@ -60,11 +60,17 @@ type Task struct {
 //GetTask ...
 func (task *Task) GetTask(language string) string {
 	typeText := "task"
+	weekday := strings.Split(task.WeekDay, ",")
+	for i := 0; i < len(weekday); i++ {
+		weekday[i] = lang.TrMess(language, "weekday", Weekday[weekday[i]].String())
+	}
+
+	wkd := strings.Join(weekday[:], ", ")
 	priority := lang.TrMess(language, "buttons", task.Priority)
 	if task.TypeTask == "Everyday" {
 		temp := lang.TrMess(language, typeText, "Task:") + task.Text + "\n" +
 			lang.TrMess(language, typeText, "Time:") + task.Time + "\n" +
-			lang.TrMess(language, typeText, "Weekdays:") + task.WeekDay + "\n" +
+			lang.TrMess(language, typeText, "Weekdays:") + wkd + "\n" +
 			lang.TrMess(language, typeText, "Priority:") + priority
 
 		return temp
