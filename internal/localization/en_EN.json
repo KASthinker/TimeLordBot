@@ -94,7 +94,9 @@
         "Error deleting tasks. Select an action:": "*Error deleting tasks.\nSelect an action:*",
         "The numbers you entered are incorrect!": "The numbers you entered are incorrect!\n*Enter the task numbers separated by commas you want to delete:*",
         "Deleted!": "❗️❗️❗️*Task deleted!*❗️❗️❗️\n",
-        "Task list:": "Task list:\n",
+        "Select a task type:": "*Select a task type:*",
+        "Error getting tasks!":"Error getting tasks!\n*Select an action:*",
+        "Task list:": "*Task list:*\n",
         "": ""
     }
 }

@@ -567,6 +567,12 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			"Select the type of task you want to delete:")
 		sndMsg.ReplyMarkup = buttons.TypeTasks(user.Language)
 		go data.Bot.Send(sndMsg)
+	case "personal_tasks":
+		user.Stage = "personal_tasks"
+		sndMsg.Text = lang.TrMess(user.Language, typeText,
+			"Select a task type:")
+		sndMsg.ReplyMarkup = buttons.TypeTasks(user.Language)
+		go data.Bot.Send(sndMsg)
 
 	// Type Task buttons
 	case "common_task", "everyday_task", "holiday_task":
@@ -623,6 +629,49 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 					go data.Bot.Send(sndMsg)
 				}
+			}
+		} else if user.Stage == "personal_tasks" {
+			typeTask := ""
+			if callback.Data == "common_task" {
+				typeTask = "Common"
+			} else if callback.Data == "everyday_task" {
+				typeTask = "Everyday"
+			} else if callback.Data == "holiday_task" {
+				typeTask = "Holiday"
+			}
+			tasks, err := db.GetTasks(message.Chat.ID, typeTask)
+			if len(tasks) == 0 {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"The task list is empty. Select an action:")
+				user.Stage = ""
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				return
+			}
+			if err != nil {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error getting tasks!")
+				user.Stage = ""
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+			} else {
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(
+						callback.Message.Chat.ID, callback.Message.MessageID))
+				sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+				sndMsg.ParseMode = "Markdown"
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Task list:")
+				user.Stage = ""
+				data.Bot.Send(sndMsg)
+				for i :=0; i < len(tasks); i++ {
+					sndMsg.Text = tasks[i].GetTask(user.Language)
+					data.Bot.Send(sndMsg)
+				}
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
 			}
 		} else {
 			user.Stage = ""
