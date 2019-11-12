@@ -88,6 +88,11 @@
         "Priority entered incorrectly. Try again.": "*Priority entered incorrectly. Try again.*\n*Cancel* - /cancel",
         "Task added:": "*Task added:*\n",
         "Failed to add task. Try again.": "*Failed to add task. Try again.*",
+        "Select the type of task you want to delete:": "*Select the type of task you want to delete:*",
+        "Enter the task numbers separated by commas you want to delete:": "*Enter the task numbers separated by commas you want to delete:*",
+        "The task list is empty. Select an action:": "The task list is empty.\nSelect an action:",
+        "Error deleting tasks. Select an action:": "*Error deleting tasks.\nSelect an action:*",
+        "The numbers you entered are incorrect!": "The numbers you entered are incorrect!\n*Enter the task numbers separated by commas you want to delete:*",
         "": ""
     }
 }

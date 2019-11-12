@@ -88,6 +88,11 @@
         "Priority entered incorrectly. Try again.": "*Приоритет введен не корректно. Попробуйте ещё раз.*\n*Отмена* - /cancel",
         "Task added:": "*Задача добавлена:*\n",
         "Failed to add task. Try again.": "*Не удалось добавить задачу. Попробуйте ещё раз.*",
+        "Select the type of task you want to delete:": "*Выберите тип удаляемой задачи:*",
+        "Enter the task numbers separated by commas you want to delete:": "*Введите номера задач, через запятую, которые вы хотите удалить:*",
+        "The task list is empty. Select an action:": "*Список задач пуст.\nВыберите действие:*",
+        "Error deleting tasks. Select an action:": "*Ошибка удаления задач.\nВыберите действие:*",
+        "The numbers you entered are incorrect!": "Номера введены не верно!\n*Введите номера задач, через запятую, которые вы хотите удалить:*",
         "": ""
     }
 }
