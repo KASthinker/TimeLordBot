@@ -2,13 +2,13 @@ package methods
 
 import (
 	"fmt"
+	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
+	"github.com/bradfitz/latlong"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"sort"
-	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
-	"github.com/bradfitz/latlong"
 )
 
 //TimeZoneGPS ...

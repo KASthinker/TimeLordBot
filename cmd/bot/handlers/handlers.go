@@ -316,8 +316,8 @@ func MessageHandler(message *tgbotapi.Message) {
 								sndMsg.ParseMode = "Markdown"
 								data.Bot.Send(sndMsg)
 							} else {
-								sndMsg.Text = lang.TrMess(user.Language, typeText, "Deleted!") + 
-											  tasks[numbers[i]-1].GetTask(user.Language)	
+								sndMsg.Text = lang.TrMess(user.Language, typeText, "Deleted!") +
+									tasks[numbers[i]-1].GetTask(user.Language)
 								sndMsg.ParseMode = "Markdown"
 								data.Bot.Send(sndMsg)
 							}
@@ -328,7 +328,7 @@ func MessageHandler(message *tgbotapi.Message) {
 					}
 					tasks = []data.Task{}
 					user.Stage = ""
-					sndMsg.Text = lang.TrMess(user.Language, typeText, "Select an action:")	
+					sndMsg.Text = lang.TrMess(user.Language, typeText, "Select an action:")
 					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 					sndMsg.ParseMode = "Markdown"
 					go data.Bot.Send(sndMsg)
@@ -613,8 +613,8 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 							callback.Message.Chat.ID, callback.Message.MessageID))
 					sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
 					for i := 0; i < len(tasks); i++ {
-						sndMsg.Text = "_№" + strconv.Itoa(i+1) + 
-									  "_\n" + tasks[i].GetTask(user.Language)
+						sndMsg.Text = "_№" + strconv.Itoa(i+1) +
+							"_\n" + tasks[i].GetTask(user.Language)
 						sndMsg.ParseMode = "Markdown"
 						data.Bot.Send(sndMsg)
 					}
@@ -664,7 +664,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 					"Task list:")
 				user.Stage = ""
 				data.Bot.Send(sndMsg)
-				for i :=0; i < len(tasks); i++ {
+				for i := 0; i < len(tasks); i++ {
 					sndMsg.Text = tasks[i].GetTask(user.Language)
 					data.Bot.Send(sndMsg)
 				}
@@ -683,5 +683,4 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.ReplyMarkup = buttons.Menu(user.Language)
 		go data.Bot.Send(sndMsg)
 	}
-
 }

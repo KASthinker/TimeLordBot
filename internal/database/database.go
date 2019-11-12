@@ -195,7 +195,7 @@ func AddNewTask(userID int64, task *data.Task) error {
 	_, err = db.Exec(fmt.Sprintf(`
 		INSERT INTO %v (type_task, text, time, date, weekday, priority) 
 		VALUES ('%v','%v','%v','%v','%v','%v');`, strUserID, task.TypeTask, task.Text,
-									  task.Time, task.Date, task.WeekDay, task.Priority))
+		task.Time, task.Date, task.WeekDay, task.Priority))
 	if err != nil {
 		log.Printf("\n\nError in insert line\n%v\n\n\n", err)
 		return err
@@ -214,24 +214,24 @@ func GetTasks(userID int64, typeTask string) ([]data.Task, error) {
 
 	rows, err := db.Query(
 		fmt.Sprintf("SELECT * FROM `%v` WHERE type_task='%v'", userID, typeTask))
-    if err != nil {
+	if err != nil {
 		log.Println(err)
 		return nil, err
-    }
+	}
 	defer rows.Close()
-	
+
 	tasks := make([]data.Task, 0)
-    for rows.Next() {
-        task := new(data.Task)
-        err := rows.Scan(&task.ID, &task.TypeTask, &task.Text, 
+	for rows.Next() {
+		task := new(data.Task)
+		err := rows.Scan(&task.ID, &task.TypeTask, &task.Text,
 			&task.Date, &task.Time, &task.WeekDay, &task.Priority)
-        if err != nil {
+		if err != nil {
 			log.Println(err)
 			return nil, err
-        }
-        tasks = append(tasks, *task)
-    }
-    if err = rows.Err(); err != nil {
+		}
+		tasks = append(tasks, *task)
+	}
+	if err = rows.Err(); err != nil {
 		log.Println(err)
 		return nil, err
 	}
