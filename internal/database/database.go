@@ -135,7 +135,8 @@ func ChangeLanguage(userID int64, lang string) error {
 	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
-	_, err = db.Exec(fmt.Sprintf("UPDATE Users SET language='%v' WHERE user_id=%v", lang, strUserID))
+	_, err = db.Exec(
+		fmt.Sprintf("UPDATE Users SET language='%v' WHERE user_id=%v", lang, strUserID))
 	if err != nil {
 		log.Printf("\n\nError in update line\n%v\n\n\n", err)
 		return err
@@ -153,7 +154,8 @@ func ChangeTimeZone(userID int64, tz string) error {
 	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
-	_, err = db.Exec(fmt.Sprintf("UPDATE Users SET timezone='%v' WHERE user_id=%v", tz, strUserID))
+	_, err = db.Exec(
+		fmt.Sprintf("UPDATE Users SET timezone='%v' WHERE user_id=%v", tz, strUserID))
 	if err != nil {
 		log.Printf("\n\nError in update line\n%v\n\n\n", err)
 		return err
@@ -171,7 +173,8 @@ func ChangeTimeFormat(userID int64, tf int) error {
 	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
-	_, err = db.Exec(fmt.Sprintf("UPDATE Users SET time_format='%v' WHERE user_id=%v", tf, strUserID))
+	_, err = db.Exec(
+		fmt.Sprintf("UPDATE Users SET time_format='%v' WHERE user_id=%v", tf, strUserID))
 	if err != nil {
 		log.Printf("\n\nError in update line\n%v\n\n\n", err)
 		return err
@@ -195,6 +198,58 @@ func AddNewTask(userID int64, task *data.Task) error {
 									  task.Time, task.Date, task.WeekDay, task.Priority))
 	if err != nil {
 		log.Printf("\n\nError in insert line\n%v\n\n\n", err)
+		return err
+	}
+	return nil
+}
+
+// GetTasks ...
+func GetTasks(userID int64, typeTask string) ([]data.Task, error) {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query(
+		fmt.Sprintf("SELECT * FROM `%v` WHERE type_task='%v'", userID, typeTask))
+    if err != nil {
+		log.Println(err)
+		return nil, err
+    }
+	defer rows.Close()
+	
+	tasks := make([]data.Task, 0)
+    for rows.Next() {
+        task := new(data.Task)
+        err := rows.Scan(&task.ID, &task.TypeTask, &task.Text, 
+			&task.Date, &task.Time, &task.WeekDay, &task.Priority)
+        if err != nil {
+			log.Println(err)
+			return nil, err
+        }
+        tasks = append(tasks, *task)
+    }
+    if err = rows.Err(); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return tasks, nil
+}
+
+// DeleteTask ...
+func DeleteTask(userID int64, ID int) error {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+	}
+	defer db.Close()
+
+	strUserID := fmt.Sprintf("`%v`", userID)
+	_, err = db.Exec(fmt.Sprintf("DELETE FROM %v WHERE id=%v;", strUserID, ID))
+	if err != nil {
+		log.Printf("\n\nError in delete line\n%v\n\n\n", err)
 		return err
 	}
 	return nil

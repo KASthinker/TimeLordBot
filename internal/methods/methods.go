@@ -134,3 +134,22 @@ func CheckWeekday(weekday string) string {
 	}
 	return ""
 }
+
+// CheckNumbers ...
+func CheckNumbers(num string) []int {
+	v := strings.Split(num, ",")
+	temp := []int{}
+	v = removeDuplicates(v)
+	for i := 0; i < len(v); i++ {
+		v[i] = strings.TrimSpace(v[i])
+	}
+	v = removeDuplicates(v)
+	for i := 0; i < len(v); i++ {
+		k, err := strconv.Atoi(v[i])
+		if err == nil {
+			temp = append(temp, k)
+		}
+	}
+	sort.Ints(temp)
+	return temp
+}

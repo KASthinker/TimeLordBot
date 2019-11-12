@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 	"github.com/KASthinker/TimeLordBot/internal/buttons"
@@ -303,6 +304,40 @@ func MessageHandler(message *tgbotapi.Message) {
 					sndMsg.ParseMode = "Markdown"
 					go data.Bot.Send(sndMsg)
 				}
+			} else if user.Stage == "select_delete_tasks" {
+				numbers := methods.CheckNumbers(message.Text)
+				tasks := data.DeleteTasksMap[message.Chat.ID]
+				if len(numbers) > 0 {
+					for i := 0; i < len(numbers); i++ {
+						if numbers[i] > 0 && numbers[i] <= len(tasks) {
+							err := db.DeleteTask(message.Chat.ID, tasks[numbers[i]-1].ID)
+							if err != nil {
+								sndMsg.Text = strconv.Itoa(numbers[i]) + " error delete!"
+								sndMsg.ParseMode = "Markdown"
+								data.Bot.Send(sndMsg)
+							} else {
+								sndMsg.Text = lang.TrMess(user.Language, typeText, "Deleted!") + 
+											  tasks[numbers[i]-1].GetTask(user.Language)	
+								sndMsg.ParseMode = "Markdown"
+								data.Bot.Send(sndMsg)
+							}
+						} else {
+							sndMsg.Text = strconv.Itoa(numbers[i]) + " - out of range!"
+							data.Bot.Send(sndMsg)
+						}
+					}
+					tasks = []data.Task{}
+					user.Stage = ""
+					sndMsg.Text = lang.TrMess(user.Language, typeText, "Select an action:")	
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+				} else {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"The numbers you entered are incorrect!")
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+				}
 			} else {
 				data.TasksMap[message.Chat.ID] = new(data.Task)
 				user.Stage = ""
@@ -478,7 +513,6 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	case "menu", "setting":
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Select an action:")
-		sndMsg.ParseMode = "Markdown"
 		if callback.Data == "menu" {
 			sndMsg.ReplyMarkup = buttons.Menu(user.Language)
 		} else if callback.Data == "setting" {
@@ -488,7 +522,6 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	case "step_back_start":
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Select an action:")
-		sndMsg.ParseMode = "Markdown"
 		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 		go data.Bot.Send(sndMsg)
 
@@ -545,12 +578,52 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			} else if callback.Data == "holiday_task" {
 				task.TypeTask = "Holiday"
 			}
-			task.TypeTask = "Common"
 			user.Stage = "new_task_text"
 			sndMsg.Text = lang.TrMess(user.Language, typeText,
 				"Enter the task text:")
-			sndMsg.ParseMode = "Markdown"
 			go data.Bot.Send(sndMsg)
+		} else if user.Stage == "delete_task" {
+			typeTask := ""
+			if callback.Data == "common_task" {
+				typeTask = "Common"
+			} else if callback.Data == "everyday_task" {
+				typeTask = "Everyday"
+			} else if callback.Data == "holiday_task" {
+				typeTask = "Holiday"
+			}
+			tasks, err := db.GetTasks(message.Chat.ID, typeTask)
+			if err != nil {
+				sndMsg.Text = lang.TrMess(user.Language, typeText,
+					"Error deleting tasks. Select an action:")
+				user.Stage = ""
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+			} else {
+				data.DeleteTasksMap[message.Chat.ID] = tasks
+				if len(tasks) > 0 {
+					user.Stage = "select_delete_tasks"
+					go data.Bot.DeleteMessage(
+						tgbotapi.NewDeleteMessage(
+							callback.Message.Chat.ID, callback.Message.MessageID))
+					sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+					for i := 0; i < len(tasks); i++ {
+						sndMsg.Text = "_№" + strconv.Itoa(i+1) + 
+									  "_\n" + tasks[i].GetTask(user.Language)
+						sndMsg.ParseMode = "Markdown"
+						data.Bot.Send(sndMsg)
+					}
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"Enter the task numbers separated by commas you want to delete:")
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+				} else {
+					sndMsg.Text = lang.TrMess(user.Language, typeText,
+						"The task list is empty. Select an action:")
+					user.Stage = ""
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					go data.Bot.Send(sndMsg)
+				}
+			}
 		} else {
 			user.Stage = ""
 		}
@@ -558,7 +631,6 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		user.Stage = ""
 		sndMsg.Text = lang.TrMess(user.Language, typeText,
 			"Select an action:")
-		sndMsg.ParseMode = "Markdown"
 		sndMsg.ReplyMarkup = buttons.Menu(user.Language)
 		go data.Bot.Send(sndMsg)
 	}

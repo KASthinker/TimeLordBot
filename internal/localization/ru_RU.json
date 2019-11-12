@@ -93,6 +93,8 @@
         "The task list is empty. Select an action:": "*Список задач пуст.\nВыберите действие:*",
         "Error deleting tasks. Select an action:": "*Ошибка удаления задач.\nВыберите действие:*",
         "The numbers you entered are incorrect!": "Номера введены не верно!\n*Введите номера задач, через запятую, которые вы хотите удалить:*",
+        "Deleted!": "❗️❗️❗️*Задача удалена!*❗️❗️❗️\n",
+        "Task list:": "Список задач:\n",
         "": ""
     }
 }
