@@ -4,8 +4,11 @@ import (
 	"log"
 
 	"github.com/BurntSushi/toml"
-	"github.com/markbates/pkger"
+
+	"github.com/KASthinker/TimeLordBot/internal/methods"
 )
+
+const path = "/configs/helpconf.toml"
 
 // Token ...
 type Token struct {
@@ -23,16 +26,11 @@ type DataBase struct {
 // GetToken will return the value of the token
 func GetToken() string {
 	var tkn Token
-	info, err := pkger.Info("")
-	if err != nil {
-		log.Fatalf("Pkger error: %v", err)
-	}
 
-	path := info.Dir + "/configs/helpconf.toml"
-	log.Printf("PATH: %v", path)
-
-	if _, err := toml.DecodeFile(path, &tkn); err != nil {
+	if _, err := toml.DecodeFile(methods.GetPath(path), &tkn); err != nil {
 		log.Fatalf("Token not received: %v", err)
+	} else {
+		log.Println("config.toml decoded!")
 	}
 	return tkn.Token
 }
@@ -40,15 +38,8 @@ func GetToken() string {
 // Configs return config list
 func Configs() *DataBase {
 	var db DataBase
-	info, err := pkger.Info("")
-	if err != nil {
-		log.Fatalf("Pkger error: %v\n", err)
-	}
 
-	path := info.Dir + "/configs/helpconf.toml"
-	log.Printf("PATH: %v", path)
-
-	if _, err = toml.DecodeFile(path, &db); err != nil {
+	if _, err := toml.DecodeFile(methods.GetPath(path), &db); err != nil {
 		log.Fatalf("Configs not received: %v\n%v", err, db)
 	} else {
 		log.Println("config.toml decoded!")

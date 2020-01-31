@@ -9,4 +9,5 @@ require (
 	github.com/markbates/pkger v0.14.0
 	github.com/stretchr/testify v1.4.0
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
+	golang.org/x/text v0.3.2
 )
