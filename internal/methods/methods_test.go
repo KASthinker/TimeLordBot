@@ -1,8 +1,9 @@
 package methods
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetPath(t *testing.T) {
@@ -10,3 +11,4 @@ func TestGetPath(t *testing.T) {
 	path := GetPath("/configs/helpconf.toml")
 	require.Equal(t, path, "/media/data/Projects/GO/TimeLordBot/configs/helpconf.toml")
 }
+
