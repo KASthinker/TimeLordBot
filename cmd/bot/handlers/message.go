@@ -43,16 +43,25 @@ func MessageHandler(message *tgbotapi.Message) {
 	if message.Location != nil {
 		if user.Stage == "reg_check_timezone" || user.Stage == "change_timezone_GPS" {
 			loctime, tz := methods.TimeZoneGPS(message.Location.Longitude, message.Location.Latitude, user.TimeFormat)
-			user.Timezone = tz
-			sndMsg.Text = lang.Translate(user.Language, typeText,
-				"Is your time ") + fmt.Sprintf("*%v*?", loctime)
-			sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
-			sndMsg.ParseMode = "Markdown"
-			go data.Bot.Send(sndMsg)
-			if user.Stage == "reg_check_timezone" {
-				user.Stage = "reg_finaly"
-			} else if user.Stage == "change_timezone_GPS" {
-				user.Stage = "update_timezone"
+			if user.Timezone == tz {
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"The timezone hasn't been changed since you selected the current time zone.")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				sndMsg.ParseMode = "Markdown"
+				go data.Bot.Send(sndMsg)
+				user.Stage = ""
+			} else {
+				user.Timezone = tz
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"Is your time ") + fmt.Sprintf("*%v*?", loctime)
+				sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
+				sndMsg.ParseMode = "Markdown"
+				go data.Bot.Send(sndMsg)
+				if user.Stage == "reg_check_timezone" {
+					user.Stage = "reg_finaly"
+				} else if user.Stage == "change_timezone_GPS" {
+					user.Stage = "update_timezone"
+				}
 			}
 		} else {
 			user.Stage = ""
@@ -147,6 +156,14 @@ func MessageHandler(message *tgbotapi.Message) {
 			go data.Bot.Send(sndMsg)
 
 			user.Stage = "reg_timezone"
+		} else if user.Stage == "update_timezone" {
+			go db.GetUserData(message.Chat.ID, user)
+			sndMsg.Text = lang.Translate(user.Language, typeText,
+				"Try again. Enter your time zone:")
+			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+			go data.Bot.Send(sndMsg)
+			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			user.Stage = "change_timezone"
 		}
 
 	//Delete account
@@ -184,13 +201,22 @@ func MessageHandler(message *tgbotapi.Message) {
 					user.Stage = "change_timezone"
 					go data.Bot.Send(sndMsg)
 				} else {
-					user.Timezone = tz
-					sndMsg.Text = lang.Translate(user.Language, typeText,
-						"Is your time ") + fmt.Sprintf("*%v*?", loctime)
-					sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
-					sndMsg.ParseMode = "Markdown"
-					go data.Bot.Send(sndMsg)
-					user.Stage = "update_timezone"
+					if user.Timezone == tz {
+						sndMsg.Text = lang.Translate(user.Language, typeText,
+							"The timezone hasn't been changed since you selected the current time zone.")
+						sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+						sndMsg.ParseMode = "Markdown"
+						go data.Bot.Send(sndMsg)
+						user.Stage = ""
+					} else {
+						user.Timezone = tz
+						sndMsg.Text = lang.Translate(user.Language, typeText,
+							"Is your time ") + fmt.Sprintf("*%v*?", loctime)
+						sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
+						sndMsg.ParseMode = "Markdown"
+						go data.Bot.Send(sndMsg)
+						user.Stage = "update_timezone"
+					}
 				}
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			} else {

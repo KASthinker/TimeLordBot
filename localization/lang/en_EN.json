@@ -98,6 +98,9 @@
         "Select a task type:": "*Select a task type:*",
         "Error getting tasks!":"Error getting tasks!\n*Select an action:*",
         "Task list:": "*Task list:*\n",
+        "The language hasn't been changed since you selected the current language.": "The language hasn't been changed since you selected the current language.\n*Select an action:*",
+        "The time format hasn't been changed since you selected the current format.": "The time format hasn't been changed since you selected the current format.\n*Select an action:*",
+        "The timezone hasn't been changed since you selected the current time zone.": "The timezone hasn't been changed since you selected the current time zone.\n*Select an action:*",
         "": ""
     }
 }

@@ -98,6 +98,9 @@
         "Select a task type:": "*Выберите тип задачи:*",
         "Error getting tasks!":"Ошибка получения задач!\n*Выберите действие:*",
         "Task list:": "*Список задач:*\n",
+        "The language hasn't been changed since you selected the current language.": "Язык не был изменен, так как вы выбрали текущий язык.\n*Выберите действие:*",
+        "The time format hasn't been changed since you selected the current format.": "Формат времени не был изменен, так как вы выбрали текущий формат.\n*Выберите действие:*",
+        "The timezone hasn't been changed since you selected the current time zone.": "Часовой пояс не был изменен, так как вы выбрали текущий часовой пояс.\n*Выберите действие:*",
         "": ""
     }
 }

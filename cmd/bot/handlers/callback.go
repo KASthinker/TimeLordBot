@@ -46,20 +46,28 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			sndMsg.ReplyMarkup = buttons.TimeFormat(user.Language)
 			go data.Bot.Send(sndMsg)
 		} else if user.Stage == "change_language" {
-			err := db.ChangeLanguage(callback.Message.Chat.ID, callback.Data)
-			if err != nil {
+			if user.Language == callback.Data {
 				user.Stage = ""
 				sndMsg.Text = lang.Translate(user.Language, typeText,
-					"Error changing language.Try again!")
+					"The language hasn't been changed since you selected the current language.")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				go data.Bot.Send(sndMsg)
 			} else {
-				user.Language = callback.Data
-				user.Stage = ""
-				sndMsg.Text = lang.Translate(user.Language, typeText,
-					"Language has changed! Select an action:")
-				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
-				go data.Bot.Send(sndMsg)
+				err := db.ChangeLanguage(callback.Message.Chat.ID, callback.Data)
+				if err != nil {
+					user.Stage = ""
+					sndMsg.Text = lang.Translate(user.Language, typeText,
+						"Error changing language.Try again!")
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					go data.Bot.Send(sndMsg)
+				} else {
+					user.Language = callback.Data
+					user.Stage = ""
+					sndMsg.Text = lang.Translate(user.Language, typeText,
+						"Language has changed! Select an action:")
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					go data.Bot.Send(sndMsg)
+				}
 			}
 		} else {
 			user.Stage = ""
@@ -67,34 +75,35 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	case "12_hour_clock", "24_hour_clock":
 		if user.Stage == "reg_time_format" {
 			user.Stage = "reg_timezone"
-			if callback.Data == "12_hour_clock" {
-				user.TimeFormat = 12
-			} else if callback.Data == "24_hour_clock" {
-				user.TimeFormat = 24
-			}
+			user.TimeFormat = data.TimeFormat[callback.Data]
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Enter your timezone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 			go data.Bot.Send(sndMsg)
 		} else if user.Stage == "change_time_format" {
-			if callback.Data == "12_hour_clock" {
-				user.TimeFormat = 12
-			} else if callback.Data == "24_hour_clock" {
-				user.TimeFormat = 24
-			}
-			err := db.ChangeTimeFormat(message.Chat.ID, user.TimeFormat)
-			if err != nil {
+			timefmt := data.TimeFormat[callback.Data]
+			if timefmt == user.TimeFormat {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
-					"Error changing time format.Try again!")
+					"The time format hasn't been changed since you selected the current format.")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				go data.Bot.Send(sndMsg)
 				user.Stage = ""
 			} else {
-				sndMsg.Text = lang.Translate(user.Language, typeText,
-					"The time format has changed. Select an action:")
-				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
-				go data.Bot.Send(sndMsg)
-				user.Stage = ""
+				err := db.ChangeTimeFormat(message.Chat.ID, timefmt)
+				if err != nil {
+					sndMsg.Text = lang.Translate(user.Language, typeText,
+						"Error changing time format.Try again!")
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					go data.Bot.Send(sndMsg)
+					user.Stage = ""
+				} else {
+					user.TimeFormat = timefmt
+					sndMsg.Text = lang.Translate(user.Language, typeText,
+						"The time format has changed. Select an action:")
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					go data.Bot.Send(sndMsg)
+					user.Stage = ""
+				}
 			}
 		}
 	case "input_timezone":
