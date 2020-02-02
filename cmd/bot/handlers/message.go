@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+
 	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 	"github.com/KASthinker/TimeLordBot/internal/buttons"
 	db "github.com/KASthinker/TimeLordBot/internal/database"
@@ -40,8 +41,7 @@ func MessageHandler(message *tgbotapi.Message) {
 
 	// User location GPS
 	if message.Location != nil {
-		if user.Stage == "reg_check_timezone" {
-			user.Stage = "reg_finaly"
+		if user.Stage == "reg_check_timezone" || user.Stage == "change_timezone_GPS" {
 			loctime, tz := methods.TimeZoneGPS(message.Location.Longitude, message.Location.Latitude, user.TimeFormat)
 			user.Timezone = tz
 			sndMsg.Text = lang.Translate(user.Language, typeText,
@@ -49,7 +49,11 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
 			sndMsg.ParseMode = "Markdown"
 			go data.Bot.Send(sndMsg)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			if user.Stage == "reg_check_timezone" {
+				user.Stage = "reg_finaly"
+			} else if user.Stage == "change_timezone_GPS" {
+				user.Stage = "update_timezone"
+			}
 		} else {
 			user.Stage = ""
 		}
@@ -63,14 +67,14 @@ func MessageHandler(message *tgbotapi.Message) {
 				"Hello! Good to see you again! Your task list is uploaded.")
 			sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 			go data.Bot.Send(sndMsg)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
 		} else {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Hello! Welcome. Choose your language please:")
 			user.Stage = "reg_language"
 			sndMsg.ReplyMarkup = buttons.Language()
 			go data.Bot.Send(sndMsg)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
 		}
 		return
 	case "cancel":
@@ -83,7 +87,7 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 			sndMsg.ParseMode = "Markdown"
 			go data.Bot.Send(sndMsg)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
 		} else {
 			user.Stage = ""
 			go data.Bot.DeleteMessage(
@@ -92,7 +96,7 @@ func MessageHandler(message *tgbotapi.Message) {
 				"Action canceled!")
 			sndMsg.ParseMode = "Markdown"
 			go data.Bot.Send(sndMsg)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
 		}
 		return
 
@@ -106,16 +110,32 @@ func MessageHandler(message *tgbotapi.Message) {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Error input timezone.Try again! Enter - /start")
 				go data.Bot.Send(sndMsg)
-				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
 				user.Stage = ""
 			} else {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Registration completed successfully. Select an action:")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				go data.Bot.Send(sndMsg)
-				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
 				user.Stage = ""
 			}
+		} else if user.Stage == "update_timezone" {
+			err := db.ChangeTimeZone(message.Chat.ID, user.Timezone)
+			if err != nil {
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"Error changing timezone.Try again!")
+				sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+				go data.Bot.Send(sndMsg)
+				user.Stage = "change_timezone"
+			} else {
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"The time zone has changed. Select an action:")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				user.Stage = ""
+			}
+			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
 			user.Stage = ""
 		}
@@ -125,10 +145,10 @@ func MessageHandler(message *tgbotapi.Message) {
 				"Try again. Enter your time zone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 			go data.Bot.Send(sndMsg)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
 			user.Stage = "reg_timezone"
 		}
-	
+
 	//Delete account
 	case lang.Translate(user.Language, typeText,
 		"Yes, I really want to delete my account!"):
@@ -154,8 +174,35 @@ func MessageHandler(message *tgbotapi.Message) {
 
 	default:
 		if user.Registered || db.IfUserExists(message.Chat.ID) {
-			sndMsg.Text = "Найден"
-			go data.Bot.Send(sndMsg)
+			if user.Stage == "change_timezone_manually" {
+				// Manually change timezone
+				loctime, tz, err := methods.TimeZoneManually(message.Text, user.TimeFormat)
+				if err != nil {
+					sndMsg.Text = lang.Translate(user.Language, typeText,
+						"Incorrect time zone entered! Try again:")
+					sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
+					user.Stage = "change_timezone"
+					go data.Bot.Send(sndMsg)
+				} else {
+					user.Timezone = tz
+					sndMsg.Text = lang.Translate(user.Language, typeText,
+						"Is your time ") + fmt.Sprintf("*%v*?", loctime)
+					sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+					user.Stage = "update_timezone"
+				}
+				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			} else {
+				data.TasksMap[message.Chat.ID] = new(data.Task)
+				user.Stage = ""
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"I don't understand this command!")
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+			}
 		} else {
 			if user.Stage == "reg_check_timezone" {
 				// Manually input timezone
@@ -166,7 +213,6 @@ func MessageHandler(message *tgbotapi.Message) {
 					sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 					user.Stage = "reg_timezone"
 					go data.Bot.Send(sndMsg)
-					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 				} else {
 					user.Timezone = tz
 					sndMsg.Text = lang.Translate(user.Language, typeText,
@@ -174,14 +220,13 @@ func MessageHandler(message *tgbotapi.Message) {
 					sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
 					sndMsg.ParseMode = "Markdown"
 					go data.Bot.Send(sndMsg)
-					sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 					user.Stage = "reg_finaly"
 				}
 			} else {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Account not found! Please register! To register, enter /start.")
 				go data.Bot.Send(sndMsg)
-				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
 			}
 		}
 	}
