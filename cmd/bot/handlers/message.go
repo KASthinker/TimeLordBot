@@ -31,13 +31,13 @@ func MessageHandler(message *tgbotapi.Message) {
 			user.Registered = false
 		}
 	}
-	// task, ok := data.TasksMap[message.Chat.ID]
-	// if !ok {
-	// 	if user.Registered || db.IfUserExists(message.Chat.ID) {
-	// 		data.TasksMap[message.Chat.ID] = new(data.Task)
-	// 		task = data.TasksMap[message.Chat.ID]
-	// 	}
-	// }
+	task, ok := data.TasksMap[message.Chat.ID]
+	if !ok {
+		if user.Registered || db.IfUserExists(message.Chat.ID) {
+			data.TasksMap[message.Chat.ID] = new(data.Task)
+			task = data.TasksMap[message.Chat.ID]
+		}
+	}
 
 	// User location GPS
 	if message.Location != nil {
@@ -75,16 +75,13 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Hello! Good to see you again! Your task list is uploaded.")
 			sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
-			go data.Bot.Send(sndMsg)
-
 		} else {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Hello! Welcome. Choose your language please:")
 			user.Stage = "reg_language"
 			sndMsg.ReplyMarkup = buttons.Language()
-			go data.Bot.Send(sndMsg)
-
 		}
+		go data.Bot.Send(sndMsg)
 		return
 	case "cancel":
 		if user.Registered || db.IfUserExists(message.Chat.ID) {
@@ -95,7 +92,6 @@ func MessageHandler(message *tgbotapi.Message) {
 				"Action canceled! Select an action:")
 			sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 			sndMsg.ParseMode = "Markdown"
-			go data.Bot.Send(sndMsg)
 
 		} else {
 			user.Stage = ""
@@ -104,11 +100,9 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Action canceled!")
 			sndMsg.ParseMode = "Markdown"
-			go data.Bot.Send(sndMsg)
-
 		}
+		go data.Bot.Send(sndMsg)
 		return
-
 	}
 
 	switch message.Text {
@@ -118,14 +112,12 @@ func MessageHandler(message *tgbotapi.Message) {
 			if err != nil {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Error input timezone.Try again! Enter - /start")
-				go data.Bot.Send(sndMsg)
 
 				user.Stage = ""
 			} else {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Registration completed successfully. Select an action:")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
-				go data.Bot.Send(sndMsg)
 
 				user.Stage = ""
 			}
@@ -135,13 +127,11 @@ func MessageHandler(message *tgbotapi.Message) {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Error changing timezone.Try again!")
 				sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
-				go data.Bot.Send(sndMsg)
 				user.Stage = "change_timezone"
 			} else {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"The time zone has changed. Select an action:")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
-				go data.Bot.Send(sndMsg)
 				user.Stage = ""
 			}
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
@@ -153,15 +143,12 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Try again. Enter your time zone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
-			go data.Bot.Send(sndMsg)
 
 			user.Stage = "reg_timezone"
 		} else if user.Stage == "update_timezone" {
-			go db.GetUserData(message.Chat.ID, user)
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Try again. Enter your time zone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
-			go data.Bot.Send(sndMsg)
 			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			user.Stage = "change_timezone"
 		}
@@ -175,12 +162,10 @@ func MessageHandler(message *tgbotapi.Message) {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Error deleting account. Try again!")
 				sndMsg.ReplyMarkup = buttons.StartButtons
-				go data.Bot.Send(sndMsg)
 				user.Stage = ""
 			} else {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Your account has been deleted. Goodbye!")
-				go data.Bot.Send(sndMsg)
 				user.Stage = ""
 				user.Registered = false
 			}
@@ -188,7 +173,6 @@ func MessageHandler(message *tgbotapi.Message) {
 			user.Stage = ""
 		}
 	//-----------------------------------------------------------------\\
-
 	default:
 		if user.Registered || db.IfUserExists(message.Chat.ID) {
 			if user.Stage == "change_timezone_manually" {
@@ -199,14 +183,12 @@ func MessageHandler(message *tgbotapi.Message) {
 						"Incorrect time zone entered! Try again:")
 					sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 					user.Stage = "change_timezone"
-					go data.Bot.Send(sndMsg)
 				} else {
 					if user.Timezone == tz {
 						sndMsg.Text = lang.Translate(user.Language, typeText,
 							"The timezone hasn't been changed since you selected the current time zone.")
 						sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 						sndMsg.ParseMode = "Markdown"
-						go data.Bot.Send(sndMsg)
 						user.Stage = ""
 					} else {
 						user.Timezone = tz
@@ -214,11 +196,34 @@ func MessageHandler(message *tgbotapi.Message) {
 							"Is your time ") + fmt.Sprintf("*%v*?", loctime)
 						sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
 						sndMsg.ParseMode = "Markdown"
-						go data.Bot.Send(sndMsg)
 						user.Stage = "update_timezone"
 					}
 				}
 				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				// Enter new task
+			} else if user.Stage == "new_task_text" {
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+				state, ok := data.StateTime[message.Chat.ID]
+				if !ok {
+					data.StateTime[message.Chat.ID] = new(data.StateTm)
+					state = data.StateTime[message.Chat.ID]
+				}
+				task.Text = message.Text
+				user.Stage = "new_task_time"
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"Select the notification time:")
+				if user.TimeFormat == 12 {
+					state.Hours = 6
+					state.Minute = 30
+					state.Meridiem = "PM"
+					sndMsg.ReplyMarkup = buttons.InputTime12(state.Hours, state.Minute, state.Meridiem)
+				} else if user.TimeFormat == 24 {
+					state.Hours = 12
+					state.Minute = 30
+					sndMsg.ReplyMarkup = buttons.InputTime24(state.Hours, state.Minute)
+				}
+				/////////////////////////////////////////////////////////////////////
 			} else {
 				data.TasksMap[message.Chat.ID] = new(data.Task)
 				user.Stage = ""
@@ -227,7 +232,6 @@ func MessageHandler(message *tgbotapi.Message) {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"I don't understand this command!")
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
-				go data.Bot.Send(sndMsg)
 			}
 		} else {
 			if user.Stage == "reg_check_timezone" {
@@ -238,22 +242,21 @@ func MessageHandler(message *tgbotapi.Message) {
 						"Incorrect time zone entered! Try again:")
 					sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
 					user.Stage = "reg_timezone"
-					go data.Bot.Send(sndMsg)
 				} else {
 					user.Timezone = tz
 					sndMsg.Text = lang.Translate(user.Language, typeText,
 						"Is your time ") + fmt.Sprintf("*%v*?", loctime)
 					sndMsg.ReplyMarkup = buttons.YesORNot(user.Language)
 					sndMsg.ParseMode = "Markdown"
-					go data.Bot.Send(sndMsg)
 					user.Stage = "reg_finaly"
 				}
 			} else {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Account not found! Please register! To register, enter /start.")
-				go data.Bot.Send(sndMsg)
 
 			}
 		}
 	}
+	sndMsg.ParseMode = "Markdown"
+	go data.Bot.Send(sndMsg)
 }

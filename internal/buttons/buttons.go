@@ -1,8 +1,14 @@
 package buttons
 
 import (
+	"fmt"
+	"strconv"
+	"time"
+
 	loc "github.com/KASthinker/TimeLordBot/localization"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 )
 
 var typeText string = "buttons"
@@ -164,22 +170,25 @@ func SendUserLocation(lang string) *tgbotapi.ReplyKeyboardMarkup {
 }
 
 // Priority ...
-func Priority(lang string) *tgbotapi.ReplyKeyboardMarkup {
-	keyboard := tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(loc.Translate(lang, typeText, "Do")),
+func Priority(lang string) *tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Do"), "Do"),
 		),
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(loc.Translate(lang, typeText, "Schedule")),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Schedule"), "Schedule"),
 		),
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(loc.Translate(lang, typeText, "Delegate")),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Delegate"), "Delegate"),
 		),
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(loc.Translate(lang, typeText, "Eliminate")),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Eliminate"), "Eliminate"),
 		),
 	)
-	keyboard.OneTimeKeyboard = true
 	return &keyboard
 }
 
@@ -203,6 +212,163 @@ func Language() *tgbotapi.InlineKeyboardMarkup {
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("🇺🇸 English", "en_EN"),
+		),
+	)
+	return &keyboard
+}
+
+// InputTime24 ...
+func InputTime24(hours, minute int) *tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🔼", "upHours"),
+			tgbotapi.NewInlineKeyboardButtonData("🔼", "upMinute"),
+			tgbotapi.NewInlineKeyboardButtonData(" ", "empty"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", hours), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", minute), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData("🆗", "TimeOK"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🔽", "downHours"),
+			tgbotapi.NewInlineKeyboardButtonData("🔽", "downMinute"),
+			tgbotapi.NewInlineKeyboardButtonData(" ", "empty"),
+		),
+	)
+
+	return &keyboard
+}
+
+// InputTime12 ...
+func InputTime12(hours, minute int, meridiem string) *tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🔼", "upHours"),
+			tgbotapi.NewInlineKeyboardButtonData("🔼", "upMinute"),
+			tgbotapi.NewInlineKeyboardButtonData("🔼", "changeMeridiem"),
+			tgbotapi.NewInlineKeyboardButtonData(" ", " "),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", hours), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", minute), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%-2s", meridiem), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData("🆗", "TimeOK"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🔽", "downHours"),
+			tgbotapi.NewInlineKeyboardButtonData("🔽", "downMinute"),
+			tgbotapi.NewInlineKeyboardButtonData("🔽", "changeMeridiem"),
+			tgbotapi.NewInlineKeyboardButtonData(" ", "empty"),
+		),
+	)
+
+	return &keyboard
+}
+
+func getCalendar(currentYear int, currentMonth time.Month) [6][7]string {
+	now := time.Now()
+	currentLocation := now.Location()
+
+	firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
+	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
+
+	calendar := [6][7]string{}
+
+	k := int(firstOfMonth.Day())
+	end := int(lastOfMonth.Day())
+
+	j := data.IntWeekday[firstOfMonth.Weekday()]
+	for i := 0; i < 6; i++ {
+		for ; j < 7 && k <= end; j++ {
+			calendar[i][j] = fmt.Sprintf("%02d", k)
+			k++
+		}
+		j = 0
+	}
+
+	return calendar
+}
+
+// InputDate ...
+func InputDate(date *data.StateDt) *tgbotapi.InlineKeyboardMarkup {
+	cld := getCalendar(date.Year, date.Month)
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				fmt.Sprintf("%v | %v | %v", date.Time, date.Month, date.Year), "-"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Пн", " "),
+			tgbotapi.NewInlineKeyboardButtonData("Вт", " "),
+			tgbotapi.NewInlineKeyboardButtonData("Ср", " "),
+			tgbotapi.NewInlineKeyboardButtonData("Чт", " "),
+			tgbotapi.NewInlineKeyboardButtonData("Пт", " "),
+			tgbotapi.NewInlineKeyboardButtonData("Сб", " "),
+			tgbotapi.NewInlineKeyboardButtonData("Вс", " "),
+		),
+	)
+
+	var rows [][]tgbotapi.InlineKeyboardButton
+
+	if cld[date.Selected[0]][date.Selected[1]] != "" {
+		i := date.Selected[0]
+		j := date.Selected[1]
+		date.Day, _ = strconv.Atoi(cld[i][j])
+		cld[i][j] = fmt.Sprintf("·%2s·", cld[i][j])
+		date.Status = true
+	} else {
+		date.Status = false
+	}
+
+	for i := 0; i < 6; i++ {
+		if i == 5 && cld[5][0] == "" {
+			break
+		}
+		row := []tgbotapi.InlineKeyboardButton(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(
+					fmt.Sprintf("%4s", cld[i][0]), fmt.Sprintf("calendar/%d/%d", i, 0)),
+				tgbotapi.NewInlineKeyboardButtonData(
+					fmt.Sprintf("%4s", cld[i][1]), fmt.Sprintf("calendar/%d/%d", i, 1)),
+				tgbotapi.NewInlineKeyboardButtonData(
+					fmt.Sprintf("%4s", cld[i][2]), fmt.Sprintf("calendar/%d/%d", i, 2)),
+				tgbotapi.NewInlineKeyboardButtonData(
+					fmt.Sprintf("%4s", cld[i][3]), fmt.Sprintf("calendar/%d/%d", i, 3)),
+				tgbotapi.NewInlineKeyboardButtonData(
+					fmt.Sprintf("%4s", cld[i][4]), fmt.Sprintf("calendar/%d/%d", i, 4)),
+				tgbotapi.NewInlineKeyboardButtonData(
+					fmt.Sprintf("%4s", cld[i][5]), fmt.Sprintf("calendar/%d/%d", i, 5)),
+				tgbotapi.NewInlineKeyboardButtonData(
+					fmt.Sprintf("%4s", cld[i][6]), fmt.Sprintf("calendar/%d/%d", i, 6)),
+			),
+		)
+		rows = append(rows, row)
+	}
+
+	futter := []tgbotapi.InlineKeyboardButton(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("<", "prevMonth"),
+			tgbotapi.NewInlineKeyboardButtonData("OK", "MonthOK"),
+			tgbotapi.NewInlineKeyboardButtonData(">", "nextMonth"),
+		),
+	)
+
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, rows...)
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, futter)
+
+	return &keyboard
+}
+
+
+// OKorCancel ...
+func OKorCancel(lang string) *tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("OK", "OKbutton"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Cancel"), "cancel"),
 		),
 	)
 	return &keyboard

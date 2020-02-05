@@ -29,7 +29,8 @@
         "Yes": "Yes",
         "No": "No",
         "12-hour clock": "12-hour clock",
-        "24-hour clock": "24-hour clock"
+        "24-hour clock": "24-hour clock",
+        "Cancel": "Cancel"
     },
     "task":{
         "Task:": "📜 *Task:* ",
@@ -79,11 +80,12 @@
         "Error changing time format.Try again!": "*Error changing time format.Try again!*",
         "The time format has changed. Select an action:": "*The time format has changed.\nSelect an action:*",
         "Enter the task text:": "*Enter the task text:*\n*Cancel* - /cancel",
-        "Enter the notification time:":"*Enter the notification time in the format* _\"HH:MM\"_.\n*Cancel* - /cancel",
+        "Select the notification time:":"*Enter the notification time:*\n*Cancel* - /cancel",
         "Incorrect time entered. Try again.": "*Incorrect time entered. Try again. Time format* _\"HH:MM\"_.\n*Cancel* - /cancel",
-        "Enter the date of notification:": "*Enter the notification date in the format* _\"DD/MM/YYYY\"_.\n*Cancel* - /cancel",
+        "Select the date of notification:": "*Select the notification date:*\n*Cancel* - /cancel",
         "Incorrect date entered. Try again.": "*Incorrect date entered. Try again. Date format* _\"DD/MM/YYYY\"_.\n*Cancel* - /cancel",
         "Choose priority:": "*Choose priority:\nCancel* - /cancel",
+        "Save this task?": "*Save this task?*\n",
         "Enter weeks numbers separated by commas:":"*Enter weeks numbers separated by commas:\nCancel* - /cancel",
         "Weeks numbers are not entered correctly. Try again.": "*Weeks numbers are not entered correctly. Try again.*\n*Cancel* - /cancel",
         "Priority entered incorrectly. Try again.": "*Priority entered incorrectly. Try again.*\n*Cancel* - /cancel",
