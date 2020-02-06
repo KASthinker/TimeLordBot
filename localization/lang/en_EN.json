@@ -52,7 +52,8 @@
         "December": "December",
         "Select": "Select",
         "Selected": "Selected ✅",
-        "Done": "Done"
+        "Done": "Done",
+        "Hide": "Hide"
     },
     "task":{
         "Task:": "📜 *Task:* ",

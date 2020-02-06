@@ -450,3 +450,14 @@ func DelTask(lang string, len int) *tgbotapi.InlineKeyboardMarkup {
 	)
 	return &keyboard
 }
+
+// HideButton ...
+func HideButton(lang string) *tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Hide"), "hide"),
+		),
+	)
+	return &keyboard
+}

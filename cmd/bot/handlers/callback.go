@@ -200,6 +200,11 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.Text = lang.Translate(user.Language, typeText,
 			"Select an action:")
 		sndMsg.ReplyMarkup = buttons.Menu(user.Language)
+	case "personal_tasks":
+		user.Stage = "personal_tasks"
+		sndMsg.Text = lang.Translate(user.Language, typeText,
+			"Select a task type:")
+		sndMsg.ReplyMarkup = buttons.TypeTasks(user.Language)
 	case "common_task", "everyday_task", "holiday_task":
 		if user.Stage == "new_task_type" {
 			switch callback.Data {
@@ -213,6 +218,49 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Enter the task text:")
 			user.Stage = "new_task_text"
+		} else if user.Stage == "personal_tasks" {
+			typeTask := ""
+			switch callback.Data {
+			case "common_task":
+				typeTask = "Common"
+			case "everyday_task":
+				typeTask = "Everyday"
+			case "holiday_task":
+				typeTask = "Holiday"
+			}
+			tasks, err := db.GetTasks(message.Chat.ID, typeTask)
+			if err != nil {
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"Error getting tasks!")
+				user.Stage = ""
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+			} else {
+				if len(tasks) > 0 {
+					data.StartHideMessage = make(map[int64]int)
+					data.StartHideMessage[message.Chat.ID] = message.MessageID + 1
+					go data.Bot.DeleteMessage(
+						tgbotapi.NewDeleteMessage(
+							callback.Message.Chat.ID, callback.Message.MessageID))
+					sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+					sndMsg.ParseMode = "Markdown"
+					sndMsg.Text = lang.Translate(user.Language, typeText,
+						"Task list:")
+					data.Bot.Send(sndMsg)
+					for i := 0; i < len(tasks); i++ {
+						sndMsg.Text = tasks[i].GetTask(user.Language)
+						if i == len(tasks) - 1 {
+							sndMsg.ReplyMarkup = buttons.HideButton(user.Language)
+						}
+						data.Bot.Send(sndMsg)
+					}
+				} else {
+					sndMsg.Text = lang.Translate(user.Language, typeText,
+						"The task list is empty. Select an action:")
+					user.Stage = ""
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				}
+			}
 		} else if user.Stage == "delete_task_type" {
 			typeTask := ""
 			switch callback.Data {
@@ -561,6 +609,20 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.ParseMode = "Markdown"
 		go data.Bot.Send(sndMsg)
 		return
+	case "hide":
+		if user.Stage == "personal_tasks" {
+			for i := data.StartHideMessage[message.Chat.ID]; i <= message.MessageID; i++ {
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, i))
+			}
+			sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+			sndMsg.Text = lang.Translate(user.Language, typeText,
+				"Select an action:")
+			sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+			sndMsg.ParseMode = "Markdown"
+			go data.Bot.Send(sndMsg)
+			return
+		}
 	default:
 		temp := strings.Split(callback.Data, "/")
 		if temp[0] == "calendar" && user.Stage == "new_task_date" {
