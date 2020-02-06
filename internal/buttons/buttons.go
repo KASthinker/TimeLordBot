@@ -3,6 +3,7 @@ package buttons
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	loc "github.com/KASthinker/TimeLordBot/localization"
@@ -296,7 +297,7 @@ func InputDate(lang string, date *data.StateDt) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				fmt.Sprintf("%v | %v | %v", date.Time, 
+				fmt.Sprintf("%v | %v | %v", date.Time,
 					loc.Translate(lang, typeText, date.Month.String()), date.Year), "-"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
@@ -376,7 +377,7 @@ func OKorCancel(lang string) *tgbotapi.InlineKeyboardMarkup {
 // InputWeekdays ...
 func InputWeekdays(lang string, weekdays *data.StateWd) *tgbotapi.InlineKeyboardMarkup {
 	temp := [...]string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
-	for i, val := range(temp) {
+	for i, val := range temp {
 		_, ok := weekdays.Selected[val]
 		if ok {
 			temp[i] = fmt.Sprintf("·%s·", loc.Translate(lang, typeText, temp[i]))
@@ -403,6 +404,48 @@ func InputWeekdays(lang string, weekdays *data.StateWd) *tgbotapi.InlineKeyboard
 			tgbotapi.NewInlineKeyboardButtonData("OK", "WeekdaysOK"),
 			tgbotapi.NewInlineKeyboardButtonData(
 				loc.Translate(lang, typeText, "Cancel"), "cancel"),
+		),
+	)
+	return &keyboard
+}
+
+// SelectDelTask ...
+func SelectDelTask(lang string, number int, stageDel *data.StateDel) *tgbotapi.InlineKeyboardMarkup {
+	var keyboard tgbotapi.InlineKeyboardMarkup
+	_, ok := stageDel.Selected[number]
+	if ok {
+		keyboard = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(
+					loc.Translate(lang, typeText, "Selected"),
+					fmt.Sprintf("deletetask/%d", number)),
+			),
+		)
+	} else {
+		keyboard = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(
+					loc.Translate(lang, typeText, "Select"),
+					fmt.Sprintf("deletetask/%d", number)),
+			),
+		)
+	}
+	return &keyboard
+}
+
+// DelTask ...
+func DelTask(lang string, len int) *tgbotapi.InlineKeyboardMarkup {
+	strSelected := strings.Split(loc.Translate(lang, typeText, "Selected"), " ")
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				fmt.Sprintf("%v %d", strSelected[0], len), "-"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Done"), "done_delete_task"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Cancel"), "cancel_delete_task"),
 		),
 	)
 	return &keyboard

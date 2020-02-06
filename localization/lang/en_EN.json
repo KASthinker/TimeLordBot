@@ -49,7 +49,10 @@
         "September": "September",
         "October": "October",
         "November": "November",
-        "December": "December"
+        "December": "December",
+        "Select": "Select",
+        "Selected": "Selected ✅",
+        "Done": "Done"
     },
     "task":{
         "Task:": "📜 *Task:* ",
@@ -115,8 +118,9 @@
         "The task list is empty. Select an action:": "The task list is empty.\nSelect an action:",
         "Error deleting tasks. Select an action:": "*Error deleting tasks.\nSelect an action:*",
         "The numbers you entered are incorrect!": "The numbers you entered are incorrect!\n*Enter the task numbers separated by commas you want to delete:*",
-        "Deleted!": "❗️❗️❗️*Task deleted!*❗️❗️❗️\n",
+        "Deleted!": "*Tasks deleted!*\n",
         "Select a task type:": "*Select a task type:*",
+        "Stage:": "*Stage:*",
         "Error getting tasks!":"Error getting tasks!\n*Select an action:*",
         "Task list:": "*Task list:*\n",
         "The language hasn't been changed since you selected the current language.": "The language hasn't been changed since you selected the current language.\n*Select an action:*",

@@ -189,7 +189,11 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.Text = lang.Translate(user.Language, typeText,
 			"Select the type of new task:")
 		sndMsg.ReplyMarkup = buttons.TypeTasks(user.Language)
-
+	case "delete_task":
+		user.Stage = "delete_task_type"
+		sndMsg.Text = lang.Translate(user.Language, typeText,
+			"Select the type of task you want to delete:")
+		sndMsg.ReplyMarkup = buttons.TypeTasks(user.Language)
 	// Type task buttons
 	case "step_back_menu":
 		user.Stage = ""
@@ -209,8 +213,57 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Enter the task text:")
 			user.Stage = "new_task_text"
+		} else if user.Stage == "delete_task_type" {
+			typeTask := ""
+			switch callback.Data {
+			case "common_task":
+				typeTask = "Common"
+			case "everyday_task":
+				typeTask = "Everyday"
+			case "holiday_task":
+				typeTask = "Holiday"
+			}
+			tasks, err := db.GetTasks(message.Chat.ID, typeTask)
+			if err != nil {
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"Error deleting tasks. Select an action:")
+				user.Stage = ""
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+			} else {
+				stateDel, ok := data.StateDelete[message.Chat.ID]
+				if !ok {
+					data.StateDelete[message.Chat.ID] = new(data.StateDel)
+					stateDel = data.StateDelete[message.Chat.ID]
+				}
+				stateDel.Selected = make(map[int]bool)
+				data.DeleteTasksMap[message.Chat.ID] = tasks
+				if len(tasks) > 0 {
+					user.Stage = "select_delete_tasks"
+					go data.Bot.DeleteMessage(
+						tgbotapi.NewDeleteMessage(
+							callback.Message.Chat.ID, callback.Message.MessageID))
+					sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+					stateDel.StartMessage = message.MessageID
+					for i := 0; i < len(tasks); i++ {
+						sndMsg.Text = fmt.Sprintf("№%v\n%v", i+1, tasks[i].GetTask(user.Language))
+						sndMsg.ReplyMarkup = buttons.SelectDelTask(user.Language, i+1, stateDel)
+						sndMsg.ParseMode = "Markdown"
+						data.Bot.Send(sndMsg)
+					}
+					stateDel.StatusMessage = message.MessageID + len(tasks) + 1
+					sndMsg.Text = lang.Translate(user.Language, typeText, "Stage:")
+					sndMsg.ReplyMarkup = buttons.DelTask(user.Language, 0)
+					sndMsg.ParseMode = "Markdown"
+					data.Bot.Send(sndMsg)
+				} else {
+					sndMsg.Text = lang.Translate(user.Language, typeText,
+						"The task list is empty. Select an action:")
+					user.Stage = ""
+					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					go data.Bot.Send(sndMsg)
+				}
+			}
 		}
-
 		// Time buttons
 	case "upHours": // Не работает сука
 		if user.Stage == "new_task_time" {
@@ -452,11 +505,62 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			data.StateDate[message.Chat.ID] = new(data.StateDt)
 			data.StateTime[message.Chat.ID] = new(data.StateTm)
 		}
+	case "done_delete_task":
+		if user.Stage == "select_delete_tasks" {
+			stateDel, ok := data.StateDelete[message.Chat.ID]
+			if !ok {
+				data.StateDelete[message.Chat.ID] = new(data.StateDel)
+				stateDel = data.StateDelete[message.Chat.ID]
+			}
+			if len(stateDel.Selected) > 0 {
+				tasks := data.DeleteTasksMap[message.Chat.ID]
+				for key := range stateDel.Selected {
+					err := db.DeleteTask(message.Chat.ID, tasks[key-1].ID)
+					if err != nil {
+						sndMsg.Text = strconv.Itoa(key) + " error delete!"
+						sndMsg.ParseMode = "Markdown"
+						data.Bot.Send(sndMsg)
+					}
+				}
+				for i := stateDel.StartMessage; i <= stateDel.StatusMessage; i++ {
+					go data.Bot.DeleteMessage(
+						tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, i))
+				}
+				sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+				sndMsg.Text = lang.Translate(user.Language, typeText, "Deleted!")
+				sndMsg.ParseMode = "Markdown"
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				data.Bot.Send(sndMsg)
+				user.Stage = ""
+				data.DeleteTasksMap = make(map[int64][]data.Task)
+				data.StateDelete = make(map[int64]*data.StateDel)
+				return
+			}
+		}
+
 	case "cancel":
 		user.Stage = ""
 		sndMsg.Text = lang.Translate(user.Language, typeText,
 			"Action canceled! Select an action:")
 		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+	case "cancel_delete_task":
+		user.Stage = ""
+		stateDel, ok := data.StateDelete[message.Chat.ID]
+		if !ok {
+			data.StateDelete[message.Chat.ID] = new(data.StateDel)
+			stateDel = data.StateDelete[message.Chat.ID]
+		}
+		for i := stateDel.StartMessage; i <= stateDel.StatusMessage; i++ {
+			go data.Bot.DeleteMessage(
+				tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, i))
+		}
+		sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+		sndMsg.Text = lang.Translate(user.Language, typeText,
+			"Action canceled! Select an action:")
+		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+		sndMsg.ParseMode = "Markdown"
+		go data.Bot.Send(sndMsg)
+		return
 	default:
 		temp := strings.Split(callback.Data, "/")
 		if temp[0] == "calendar" && user.Stage == "new_task_date" {
@@ -470,6 +574,34 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Select the date of notification:")
 			sndMsg.ReplyMarkup = buttons.InputDate(user.Language, date)
+		} else if temp[0] == "deletetask" && user.Stage == "select_delete_tasks" {
+			stateDel, ok := data.StateDelete[message.Chat.ID]
+			if !ok {
+				data.StateDelete[message.Chat.ID] = new(data.StateDel)
+				stateDel = data.StateDelete[message.Chat.ID]
+			}
+			messageID, _ := strconv.Atoi(temp[1])
+			_, ok = stateDel.Selected[messageID]
+			if ok {
+				delete(stateDel.Selected, messageID)
+				sndMsg := tgbotapi.NewEditMessageReplyMarkup(message.Chat.ID,
+					stateDel.StartMessage+messageID,
+					*buttons.SelectDelTask(user.Language, messageID, stateDel))
+				go data.Bot.Send(sndMsg)
+				sndMsg = tgbotapi.NewEditMessageReplyMarkup(message.Chat.ID,
+					stateDel.StatusMessage, *buttons.DelTask(user.Language, len(stateDel.Selected)))
+				go data.Bot.Send(sndMsg)
+			} else {
+				stateDel.Selected[messageID] = true
+				sndMsg := tgbotapi.NewEditMessageReplyMarkup(message.Chat.ID,
+					stateDel.StartMessage+messageID,
+					*buttons.SelectDelTask(user.Language, messageID, stateDel))
+				go data.Bot.Send(sndMsg)
+				sndMsg = tgbotapi.NewEditMessageReplyMarkup(message.Chat.ID,
+					stateDel.StatusMessage, *buttons.DelTask(user.Language, len(stateDel.Selected)))
+				go data.Bot.Send(sndMsg)
+			}
+			return
 		}
 
 	}

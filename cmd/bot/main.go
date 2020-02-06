@@ -17,6 +17,7 @@ func init() {
 	data.StateDate = make(map[int64]*data.StateDt)
 	data.StateTime = make(map[int64]*data.StateTm)
 	data.StateWeekdays = make(map[int64]*data.StateWd)
+	data.StateDelete = make(map[int64]*data.StateDel)
 
 	data.Bot, data.Err = tgbotapi.NewBotAPI(configs.GetToken())
 	if data.Err != nil {
