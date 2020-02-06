@@ -291,22 +291,22 @@ func getCalendar(currentYear int, currentMonth time.Month) [6][7]string {
 }
 
 // InputDate ...
-func InputDate(date *data.StateDt) *tgbotapi.InlineKeyboardMarkup {
+func InputDate(lang string, date *data.StateDt) *tgbotapi.InlineKeyboardMarkup {
 	cld := getCalendar(date.Year, date.Month)
-
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				fmt.Sprintf("%v | %v | %v", date.Time, date.Month, date.Year), "-"),
+				fmt.Sprintf("%v | %v | %v", date.Time, 
+					loc.Translate(lang, typeText, date.Month.String()), date.Year), "-"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Пн", " "),
-			tgbotapi.NewInlineKeyboardButtonData("Вт", " "),
-			tgbotapi.NewInlineKeyboardButtonData("Ср", " "),
-			tgbotapi.NewInlineKeyboardButtonData("Чт", " "),
-			tgbotapi.NewInlineKeyboardButtonData("Пт", " "),
-			tgbotapi.NewInlineKeyboardButtonData("Сб", " "),
-			tgbotapi.NewInlineKeyboardButtonData("Вс", " "),
+			tgbotapi.NewInlineKeyboardButtonData(loc.Translate(lang, typeText, "Mon"), " "),
+			tgbotapi.NewInlineKeyboardButtonData(loc.Translate(lang, typeText, "Tue"), " "),
+			tgbotapi.NewInlineKeyboardButtonData(loc.Translate(lang, typeText, "Wed"), " "),
+			tgbotapi.NewInlineKeyboardButtonData(loc.Translate(lang, typeText, "Thu"), " "),
+			tgbotapi.NewInlineKeyboardButtonData(loc.Translate(lang, typeText, "Fri"), " "),
+			tgbotapi.NewInlineKeyboardButtonData(loc.Translate(lang, typeText, "Sat"), " "),
+			tgbotapi.NewInlineKeyboardButtonData(loc.Translate(lang, typeText, "Sun"), " "),
 		),
 	)
 
@@ -361,12 +361,43 @@ func InputDate(date *data.StateDt) *tgbotapi.InlineKeyboardMarkup {
 	return &keyboard
 }
 
-
 // OKorCancel ...
 func OKorCancel(lang string) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("OK", "OKbutton"),
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Cancel"), "cancel"),
+		),
+	)
+	return &keyboard
+}
+
+// InputWeekdays ...
+func InputWeekdays(lang string, weekdays *data.StateWd) *tgbotapi.InlineKeyboardMarkup {
+	temp := [...]string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
+	for i, val := range(temp) {
+		_, ok := weekdays.Selected[val]
+		if ok {
+			temp[i] = fmt.Sprintf("·%s·", loc.Translate(lang, typeText, temp[i]))
+			weekdays.Status = true
+		} else {
+			temp[i] = fmt.Sprintf("%s", loc.Translate(lang, typeText, temp[i]))
+		}
+	}
+
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(temp[0], "Mon"),
+			tgbotapi.NewInlineKeyboardButtonData(temp[1], "Tue"),
+			tgbotapi.NewInlineKeyboardButtonData(temp[2], "Wed"),
+			tgbotapi.NewInlineKeyboardButtonData(temp[3], "Thu"),
+			tgbotapi.NewInlineKeyboardButtonData(temp[4], "Fri"),
+			tgbotapi.NewInlineKeyboardButtonData(temp[5], "Sat"),
+			tgbotapi.NewInlineKeyboardButtonData(temp[6], "Sun"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("OK", "WeekdaysOK"),
 			tgbotapi.NewInlineKeyboardButtonData(
 				loc.Translate(lang, typeText, "Cancel"), "cancel"),
 		),

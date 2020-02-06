@@ -1,8 +1,9 @@
 package main
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 	"github.com/KASthinker/TimeLordBot/cmd/bot/handlers"
@@ -15,6 +16,7 @@ func init() {
 	data.DeleteTasksMap = make(map[int64][]data.Task)
 	data.StateDate = make(map[int64]*data.StateDt)
 	data.StateTime = make(map[int64]*data.StateTm)
+	data.StateWeekdays = make(map[int64]*data.StateWd)
 
 	data.Bot, data.Err = tgbotapi.NewBotAPI(configs.GetToken())
 	if data.Err != nil {

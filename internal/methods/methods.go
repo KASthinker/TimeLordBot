@@ -1,10 +1,10 @@
 package methods
 
 import (
-	"log"
-	"time"
-	"strconv"
 	"fmt"
+	"log"
+	"strconv"
+	"time"
 
 	"github.com/bradfitz/latlong"
 	"github.com/markbates/pkger"
