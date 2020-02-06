@@ -388,6 +388,9 @@ func InputWeekdays(lang string, weekdays *data.StateWd) *tgbotapi.InlineKeyboard
 
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(weekdays.Time, "-"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(temp[0], "Mon"),
 			tgbotapi.NewInlineKeyboardButtonData(temp[1], "Tue"),
 			tgbotapi.NewInlineKeyboardButtonData(temp[2], "Wed"),

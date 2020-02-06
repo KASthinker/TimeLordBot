@@ -298,30 +298,37 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			sndMsg.ReplyMarkup = buttons.InputTime12(state.Hours, state.Minute, state.Meridiem)
 		}
 	case "TimeOK":
-		date, ok := data.StateDate[message.Chat.ID]
-		if !ok {
-			data.StateDate[message.Chat.ID] = new(data.StateDt)
-			date = data.StateDate[message.Chat.ID]
-		}
-		if user.TimeFormat == 24 {
-			date.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
-			task.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
-		} else if user.TimeFormat == 12 {
-			date.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
-			task.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
-		}
 		if task.TypeTask == "Everyday" {
-			user.Stage = "new_task_weekdays"
-			sndMsg.Text = lang.Translate(user.Language, typeText,
-				"Select the days of the week you want to receive notifications:")
 			weekdays, ok := data.StateWeekdays[message.Chat.ID]
 			if !ok {
 				data.StateWeekdays[message.Chat.ID] = new(data.StateWd)
 				weekdays = data.StateWeekdays[message.Chat.ID]
 			}
+			if user.TimeFormat == 24 {
+				weekdays.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
+				task.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
+			} else if user.TimeFormat == 12 {
+				weekdays.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
+				task.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
+			}
+			user.Stage = "new_task_weekdays"
+			sndMsg.Text = lang.Translate(user.Language, typeText,
+				"Select the days of the week you want to receive notifications:")
 			weekdays.Selected = make(map[string]bool)
 			sndMsg.ReplyMarkup = buttons.InputWeekdays(user.Language, weekdays)
 		} else {
+			date, ok := data.StateDate[message.Chat.ID]
+			if !ok {
+				data.StateDate[message.Chat.ID] = new(data.StateDt)
+				date = data.StateDate[message.Chat.ID]
+			}
+			if user.TimeFormat == 24 {
+				date.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
+				task.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
+			} else if user.TimeFormat == 12 {
+				date.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
+				task.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
+			}
 			user.Stage = "new_task_date"
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Select the date of notification:")
@@ -418,7 +425,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 				sndMsg.ReplyMarkup = buttons.Priority(user.Language)
 				sndMsg.ParseMode = "Markdown"
 				data.StateWeekdays[message.Chat.ID] = new(data.StateWd)
-				data.StateWeekdays[message.Chat.ID].Selected = make(map[string]bool) 
+				data.StateWeekdays[message.Chat.ID].Selected = make(map[string]bool)
 			}
 		}
 	case "Do", "Schedule", "Delegate", "Eliminate":
