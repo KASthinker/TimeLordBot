@@ -6,7 +6,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/cmd/bot/handlers"
 	"github.com/KASthinker/TimeLordBot/configs"
 )

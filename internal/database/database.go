@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/configs"
 	"github.com/KASthinker/TimeLordBot/internal/methods"
 	_ "github.com/go-sql-driver/mysql"
@@ -14,7 +14,9 @@ import (
 
 // Users ...
 type Users struct {
-	UserID      int
+	UserID      int64
+	Language    string
+	TimeFormat  string
 	TypeAccount string
 	TimeZone    string
 	GroupID     string
@@ -310,4 +312,37 @@ func TodayTasks(userID int64, tz string) ([]data.Task, error) {
 		return nil, err
 	}
 	return tasks, nil
+}
+
+// GetUsers ...
+func GetUsers() ([]Users, error) {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT user_id, language, timezone FROM Users")
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []Users
+	for rows.Next() {
+		var user Users
+		err := rows.Scan(&user.UserID, &user.Language, &user.TimeZone)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err = rows.Err(); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return users, nil
 }

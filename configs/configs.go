@@ -29,8 +29,6 @@ func GetToken() string {
 
 	if _, err := toml.DecodeFile(methods.GetPath(path), &tkn); err != nil {
 		log.Fatalf("Token not received: %v", err)
-	} else {
-		log.Println("config.toml decoded!")
 	}
 	return tkn.Token
 }
@@ -41,8 +39,6 @@ func Configs() *DataBase {
 
 	if _, err := toml.DecodeFile(methods.GetPath(path), &db); err != nil {
 		log.Fatalf("Configs not received: %v\n%v", err, db)
-	} else {
-		log.Println("config.toml decoded!")
 	}
 	return &db
 }

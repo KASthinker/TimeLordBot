@@ -18,3 +18,9 @@ func TestIfUserExists(t *testing.T) {
 	require.Equal(t, IfUserExists(test), false)
 	db.Close()
 }
+
+func TestGetUsersID(t *testing.T) {
+	t.Parallel()
+	users, _ := GetUsers()
+	require.Equal(t, users, 0)
+}

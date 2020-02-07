@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/internal/buttons"
 	db "github.com/KASthinker/TimeLordBot/internal/database"
 	lang "github.com/KASthinker/TimeLordBot/localization"

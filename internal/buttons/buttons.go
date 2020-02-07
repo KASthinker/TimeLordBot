@@ -9,7 +9,7 @@ import (
 	loc "github.com/KASthinker/TimeLordBot/localization"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 )
 
 var typeText string = "buttons"
