@@ -194,7 +194,6 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.Text = lang.Translate(user.Language, typeText,
 			"Select the type of task you want to delete:")
 		sndMsg.ReplyMarkup = buttons.TypeTasks(user.Language)
-	// Type task buttons
 	case "step_back_menu":
 		user.Stage = ""
 		sndMsg.Text = lang.Translate(user.Language, typeText,
@@ -205,6 +204,42 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.Text = lang.Translate(user.Language, typeText,
 			"Select a task type:")
 		sndMsg.ReplyMarkup = buttons.TypeTasks(user.Language)
+	case "today_tasks":
+		user.Stage = "today_tasks"
+		tasks, err := db.TodayTasks(message.Chat.ID, user.Timezone)
+		if err != nil {
+			sndMsg.Text = lang.Translate(user.Language, typeText,
+				"Error getting tasks!")
+			user.Stage = ""
+			sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+			go data.Bot.Send(sndMsg)
+		} else {
+			if len(tasks) > 0 {
+				data.StartHideMessage = make(map[int64]int)
+				data.StartHideMessage[message.Chat.ID] = message.MessageID + 1
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(
+						callback.Message.Chat.ID, callback.Message.MessageID))
+				sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+				sndMsg.ParseMode = "Markdown"
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"Task list:")
+				data.Bot.Send(sndMsg)
+				for i := 0; i < len(tasks); i++ {
+					sndMsg.Text = tasks[i].GetTask(user.Language)
+					if i == len(tasks)-1 {
+						sndMsg.ReplyMarkup = buttons.HideButton(user.Language)
+					}
+					data.Bot.Send(sndMsg)
+				}
+			} else {
+				sndMsg.Text = lang.Translate(user.Language, typeText,
+					"The task list is empty. Select an action:")
+				user.Stage = ""
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+			}
+		}
+		// Type task buttons
 	case "common_task", "everyday_task", "holiday_task":
 		if user.Stage == "new_task_type" {
 			switch callback.Data {
@@ -249,7 +284,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 					data.Bot.Send(sndMsg)
 					for i := 0; i < len(tasks); i++ {
 						sndMsg.Text = tasks[i].GetTask(user.Language)
-						if i == len(tasks) - 1 {
+						if i == len(tasks)-1 {
 							sndMsg.ReplyMarkup = buttons.HideButton(user.Language)
 						}
 						data.Bot.Send(sndMsg)
@@ -610,7 +645,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		go data.Bot.Send(sndMsg)
 		return
 	case "hide":
-		if user.Stage == "personal_tasks" {
+		if user.Stage == "personal_tasks" || user.Stage == "today_tasks" {
 			for i := data.StartHideMessage[message.Chat.ID]; i <= message.MessageID; i++ {
 				go data.Bot.DeleteMessage(
 					tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, i))

@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
 	"github.com/KASthinker/TimeLordBot/configs"
+	"github.com/KASthinker/TimeLordBot/internal/methods"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -253,4 +255,59 @@ func DeleteTask(userID int64, ID int) error {
 		return err
 	}
 	return nil
+}
+
+// TodayTasks ...
+func TodayTasks(userID int64, tz string) ([]data.Task, error) {
+	db, err := Connect()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer db.Close()
+
+	date, err := methods.LocDate(tz)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	weekday, err := methods.LocWeekday(tz)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	strUserID := fmt.Sprintf("`%v`", userID)
+	rows, err := db.Query(
+		fmt.Sprintf(`
+		SELECT * FROM %s WHERE date='%v' 
+		UNION 
+		SELECT * FROM %s WHERE type_task='Everyday' 
+		ORDER BY time;`, strUserID, date, strUserID))
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	tasks := make([]data.Task, 0)
+	for rows.Next() {
+		task := new(data.Task)
+		err := rows.Scan(&task.ID, &task.TypeTask, &task.Text,
+			&task.Date, &task.Time, &task.WeekDay, &task.Priority)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		if task.TypeTask == "Everyday" {
+			if !strings.Contains(task.WeekDay, weekday) {
+				continue
+			}
+		}
+		tasks = append(tasks, *task)
+	}
+	if err = rows.Err(); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return tasks, nil
 }

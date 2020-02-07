@@ -68,3 +68,64 @@ func TimeZoneManually(strtz string, timeformat int) (loctime string, tz string, 
 	tz, _ = local.Zone()
 	return loctime, tz, nil
 }
+
+// LocDate ...
+func LocDate(timezone string) (string, error) {
+	inttz, err := strconv.Atoi(timezone)
+	if err != nil {
+		return "", err
+	}
+
+	if inttz < -12 || inttz > 14 {
+		return "", err
+	}
+	inttz *= (-1)
+
+	tz := fmt.Sprintf("Etc/GMT%+d", inttz)
+	utc := time.Now().UTC()
+	local := utc
+	location, err := time.LoadLocation(tz)
+	if err == nil {
+		local = local.In(location)
+	}
+
+	year, month, day := local.Date()
+	date := fmt.Sprintf("%d-%d-%d", year, int(month), day)
+
+	return date, nil
+}
+
+// LocWeekday ...
+func LocWeekday(timezone string) (string, error) {
+	var shortWeekday = map[time.Weekday]string{
+		time.Monday:    "Mon",
+		time.Tuesday:   "Tue",
+		time.Wednesday: "Wed",
+		time.Thursday:  "Thu",
+		time.Friday:    "Fri",
+		time.Saturday:  "Sat",
+		time.Sunday:    "Sun",
+	}
+	
+	inttz, err := strconv.Atoi(timezone)
+	if err != nil {
+		return "", err
+	}
+
+	if inttz < -12 || inttz > 14 {
+		return "", err
+	}
+	inttz *= (-1)
+
+	tz := fmt.Sprintf("Etc/GMT%+d", inttz)
+	utc := time.Now().UTC()
+	local := utc
+	location, err := time.LoadLocation(tz)
+	if err == nil {
+		local = local.In(location)
+	}
+
+	weekday := shortWeekday[local.Weekday()]
+
+	return weekday, nil
+}

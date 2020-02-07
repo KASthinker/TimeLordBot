@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+
 	"github.com/KASthinker/TimeLordBot/internal/methods"
 )
 
-var language = map[string]string {
+var language = map[string]string{
 	"en_EN": "en_EN.json",
 	"ru_RU": "ru_RU.json",
 }

@@ -12,3 +12,8 @@ func TestGetPath(t *testing.T) {
 	require.Equal(t, path, "/media/data/Projects/GO/TimeLordBot/configs/helpconf.toml")
 }
 
+func TestLocDate(t *testing.T) {
+	t.Parallel()
+	date, _ := LocDate("+08")
+	require.Equal(t, date, "")
+}
