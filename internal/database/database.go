@@ -73,14 +73,14 @@ func NewUser(user *data.UserData, userID int64) error {
 			PRIMARY KEY (id)
 		);`, strUserID))
 	if err != nil {
-		log.Printf("\n\nError in add User table\n%v\n\n\n", err)
+		log.Printf("Error in add User table\n%v\n", err)
 		return err
 	}
 	_, err = db.Exec(fmt.Sprintf(`
 		INSERT INTO Users (user_id, language, timezone, time_format) 
 		VALUES (%v, '%v', '%v', '%v');`, userID, user.Language, user.Timezone, user.TimeFormat))
 	if err != nil {
-		log.Printf("\n\nError in insert line\n%v\n\n\n", err)
+		log.Printf("Error in insert line\n%v\n", err)
 		return err
 	}
 
@@ -101,7 +101,7 @@ func GetUserData(userID int64, user *data.UserData) {
 	if err == sql.ErrNoRows {
 		log.Printf("\n\n\n%v\n\n\n", err)
 	}
-	log.Printf("\n\n\nOK-> %v:%v:%v\n\n\n", user.Language, user.Timezone, user.TimeFormat)
+	log.Printf("OK-> %v:%v:%v\n", user.Language, user.Timezone, user.TimeFormat)
 }
 
 // DeleteUserAccount ...

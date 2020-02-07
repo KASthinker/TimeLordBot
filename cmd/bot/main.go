@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -19,11 +20,19 @@ func init() {
 	data.StateWeekdays = make(map[int64]*data.StateWd)
 	data.StateDelete = make(map[int64]*data.StateDel)
 
+	file, err := os.Create("log.txt")
+    if err != nil{ 
+        os.Exit(1) 
+    }
+    defer file.Close() 
+
+	log.SetOutput(file)
+
 	data.Bot, data.Err = tgbotapi.NewBotAPI(configs.GetToken())
 	if data.Err != nil {
 		log.Println(data.Err)
 	}
-	data.Bot.Debug = true
+	data.Bot.Debug = false
 
 	log.Printf("Authorized on account %s", data.Bot.Self.UserName)
 }
