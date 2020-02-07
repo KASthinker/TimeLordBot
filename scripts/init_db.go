@@ -17,18 +17,24 @@ var (
 )
 
 func main() {
+	conf := configs.Configs()
 	once.Do(func() {
-		conf := configs.Config()
 		db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", conf.User, conf.Password, conf.DBname))
 	})
-	defer db.Close()
 
 	if err != nil {
-		log.Println(err)
+		log.Fatalf("Error opening DB: %v", err)
+	} else {
+		log.Println("DB open!")
 	}
-	//defer db.Close()
+	defer db.Close()
 
-	db.Exec("ALTER DATABASE TimeLordBot charset=utf8;")
+	_, err = db.Exec(fmt.Sprintf("ALTER DATABASE %v charset=utf8;", conf.DBname))
+	if err != nil {
+		log.Fatalln(err)
+	} else {
+		log.Printf("OK! -> '%v'", fmt.Sprintf("ALTER DATABASE %v charset=utf8;", conf.DBname))
+	}
 
 	_, err = db.Exec(
 		`CREATE TABLE Users (
@@ -41,9 +47,10 @@ func main() {
             PRIMARY KEY (user_id)
 		);`)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
+	} else {
+		log.Println("OK! -> 'CREATE TABLE Users'")
 	}
-	fmt.Println("OK")
 
 	_, err = db.Exec(
 		`
@@ -56,7 +63,8 @@ func main() {
 			PRIMARY KEY (id)
 		);`)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
+	} else {
+		log.Println("OK! -> 'CREATE TABLE Groups'")
 	}
-	fmt.Println("OK")
 }

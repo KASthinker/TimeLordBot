@@ -2,14 +2,24 @@ package methods
 
 import (
 	"fmt"
-	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
-	"github.com/bradfitz/latlong"
 	"log"
-	"sort"
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/bradfitz/latlong"
+	"github.com/markbates/pkger"
 )
+
+//GetPath returns the path to the main working directory (if path = "")
+//or the path to the file inside the application, if it's path is specified.
+func GetPath(path string) string {
+	info, err := pkger.Info("")
+	if err != nil {
+		log.Fatalf("Error GetPath(): %v", err)
+	}
+
+	return info.Dir + path
+}
 
 //TimeZoneGPS ...
 func TimeZoneGPS(Longitude, Latitude float64, timeformat int) (loctime string, tz string) {
@@ -21,10 +31,8 @@ func TimeZoneGPS(Longitude, Latitude float64, timeformat int) (loctime string, t
 		local = local.In(location)
 	}
 	if timeformat == 24 {
-		log.Printf("\n\n24-hour clock\n%v\n\n\n", timeformat)
 		loctime = local.Format("15:04")
 	} else if timeformat == 12 {
-		log.Printf("\n\n12-hour clock\n%v\n\n\n", timeformat)
 		loctime = local.Format("03:04 PM")
 	}
 	tz, _ = local.Zone()
@@ -52,10 +60,8 @@ func TimeZoneManually(strtz string, timeformat int) (loctime string, tz string, 
 	}
 
 	if timeformat == 24 {
-		log.Printf("\n\n24-hour clock\n%v\n\n\n", timeformat)
 		loctime = local.Format("15:04")
 	} else if timeformat == 12 {
-		log.Printf("\n\n12-hour clock\n%v\n\n\n", timeformat)
 		loctime = local.Format("03:04 PM")
 	}
 
@@ -63,93 +69,63 @@ func TimeZoneManually(strtz string, timeformat int) (loctime string, tz string, 
 	return loctime, tz, nil
 }
 
-// CheckTime ...
-func CheckTime(strTime string) error {
-	strTime = strings.TrimSpace(strTime)
-	_, err := time.Parse("15:04", strTime)
+// LocDate ...
+func LocDate(timezone string) (string, error) {
+	inttz, err := strconv.Atoi(timezone)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	if inttz < -12 || inttz > 14 {
+		return "", err
+	}
+	inttz *= (-1)
+
+	tz := fmt.Sprintf("Etc/GMT%+d", inttz)
+	utc := time.Now().UTC()
+	local := utc
+	location, err := time.LoadLocation(tz)
+	if err == nil {
+		local = local.In(location)
+	}
+
+	year, month, day := local.Date()
+	date := fmt.Sprintf("%d-%d-%d", year, int(month), day)
+
+	return date, nil
 }
 
-// CheckDate ...
-func CheckDate(strDate string) (string, error) {
-	strDate = strings.TrimSpace(strDate)
-	tm, err := time.Parse("02/01/2006", strDate)
+// LocWeekday ...
+func LocWeekday(timezone string) (string, error) {
+	var shortWeekday = map[time.Weekday]string{
+		time.Monday:    "Mon",
+		time.Tuesday:   "Tue",
+		time.Wednesday: "Wed",
+		time.Thursday:  "Thu",
+		time.Friday:    "Fri",
+		time.Saturday:  "Sat",
+		time.Sunday:    "Sun",
+	}
+	
+	inttz, err := strconv.Atoi(timezone)
 	if err != nil {
-		tm, err = time.Parse("02.01.2006", strDate)
-		if err != nil {
-			return "", err
-		}
+		return "", err
 	}
 
-	return tm.Format("02-01-2006"), nil
-}
-
-// ConvDate ...
-func ConvDate(strDate, language string) string {
-	strDate = strings.TrimSpace(strDate)
-	tm, _ := time.Parse("02-01-2006", strDate)
-	if language == "en_EN" {
-		return tm.Format("02/01/2006")
-	} else if language == "ru_RU" {
-		return tm.Format("02.01.2006")
+	if inttz < -12 || inttz > 14 {
+		return "", err
 	}
-	return ""
-}
+	inttz *= (-1)
 
-func removeDuplicates(elements []string) []string {
-	encountered := map[string]bool{}
-	result := []string{}
-
-	for v := range elements {
-		if encountered[elements[v]] != true {
-			encountered[elements[v]] = true
-			result = append(result, elements[v])
-		}
-	}
-	return result
-}
-
-// CheckWeekday ...
-func CheckWeekday(weekday string) string {
-	v := strings.Split(weekday, ",")
-	temp := []string{}
-
-	for i := 0; i < len(v); i++ {
-		_, ok := data.Weekday[strings.TrimSpace(v[i])]
-		if ok {
-			temp = append(temp, strings.TrimSpace(v[i]))
-		}
+	tz := fmt.Sprintf("Etc/GMT%+d", inttz)
+	utc := time.Now().UTC()
+	local := utc
+	location, err := time.LoadLocation(tz)
+	if err == nil {
+		local = local.In(location)
 	}
 
-	temp = removeDuplicates(temp)
-	sort.Strings(temp)
-	str := strings.Join(temp[:], ",")
+	weekday := shortWeekday[local.Weekday()]
 
-	if len(temp) > 0 {
-		return str
-	}
-	return ""
-}
-
-// CheckNumbers ...
-func CheckNumbers(num string) []int {
-	v := strings.Split(num, ",")
-	temp := []int{}
-	v = removeDuplicates(v)
-	for i := 0; i < len(v); i++ {
-		v[i] = strings.TrimSpace(v[i])
-	}
-	v = removeDuplicates(v)
-	for i := 0; i < len(v); i++ {
-		k, err := strconv.Atoi(v[i])
-		if err == nil {
-			temp = append(temp, k)
-		}
-	}
-	sort.Ints(temp)
-	return temp
+	return weekday, nil
 }

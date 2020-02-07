@@ -1,7 +1,4 @@
-[bot]
-Token = ""
-
-[database]
+token = ""
 user = ""
 password = ""
 host = ""

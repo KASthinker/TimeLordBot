@@ -1,4 +1,2 @@
+bot
 configs/helpconf.toml
-test.go
-cmd/bot/bot
-.vscode/launch.json
