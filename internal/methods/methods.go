@@ -69,6 +69,29 @@ func TimeZoneManually(strtz string, timeformat int) (loctime string, tz string, 
 	return loctime, tz, nil
 }
 
+// LocTime ...
+func LocTime(timezone string) (string, error) {
+	inttz, err := strconv.Atoi(timezone)
+	if err != nil {
+		return "", err
+	}
+
+	if inttz < -12 || inttz > 14 {
+		return "", err
+	}
+	inttz *= (-1)
+
+	tz := fmt.Sprintf("Etc/GMT%+d", inttz)
+	utc := time.Now().UTC()
+	local := utc
+	location, err := time.LoadLocation(tz)
+	if err == nil {
+		local = local.In(location)
+	}
+	loctime := local.Format("15:04")
+	return loctime, nil
+}
+
 // LocDate ...
 func LocDate(timezone string) (string, error) {
 	inttz, err := strconv.Atoi(timezone)
@@ -106,7 +129,7 @@ func LocWeekday(timezone string) (string, error) {
 		time.Saturday:  "Sat",
 		time.Sunday:    "Sun",
 	}
-	
+
 	inttz, err := strconv.Atoi(timezone)
 	if err != nil {
 		return "", err

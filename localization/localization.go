@@ -28,7 +28,7 @@ func Translate(lang string, typeText string, text string) string {
 
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(path)
+		log.Fatalf("%v: %v", err, path)
 	}
 
 	err = json.Unmarshal(file, &data)

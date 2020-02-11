@@ -2,10 +2,11 @@ package main
 
 import (
 	"log"
+	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/KASthinker/TimeLordBot/cmd/bot/data"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/cmd/bot/handlers"
 	"github.com/KASthinker/TimeLordBot/configs"
 )
@@ -19,11 +20,19 @@ func init() {
 	data.StateWeekdays = make(map[int64]*data.StateWd)
 	data.StateDelete = make(map[int64]*data.StateDel)
 
+	file, err := os.OpenFile("log.txt", os.O_APPEND|os.O_WRONLY, 0600)
+    if err != nil{ 
+        os.Exit(1) 
+    }
+    defer file.Close() 
+
+	log.SetOutput(file)
+
 	data.Bot, data.Err = tgbotapi.NewBotAPI(configs.GetToken())
 	if data.Err != nil {
 		log.Println(data.Err)
 	}
-	data.Bot.Debug = true
+	data.Bot.Debug = false
 
 	log.Printf("Authorized on account %s", data.Bot.Self.UserName)
 }
@@ -35,6 +44,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	defer log.Println("Bot stopped!")
 
 	for update := range updates {
 		if update.CallbackQuery != nil {
