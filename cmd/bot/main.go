@@ -20,7 +20,7 @@ func init() {
 	data.StateWeekdays = make(map[int64]*data.StateWd)
 	data.StateDelete = make(map[int64]*data.StateDel)
 
-	file, err := os.Create("log.txt")
+	file, err := os.OpenFile("log.txt", os.O_APPEND|os.O_WRONLY, 0600)
     if err != nil{ 
         os.Exit(1) 
     }
@@ -44,6 +44,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	defer log.Println("Bot stopped!")
 
 	for update := range updates {
 		if update.CallbackQuery != nil {

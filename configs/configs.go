@@ -26,8 +26,9 @@ type DataBase struct {
 // GetToken will return the value of the token
 func GetToken() string {
 	var tkn Token
-
-	if _, err := toml.DecodeFile(methods.GetPath(path), &tkn); err != nil {
+	
+	p := methods.GetPath(path)
+	if _, err := toml.DecodeFile(p, &tkn); err != nil {
 		log.Fatalf("Token not received: %v", err)
 	}
 	return tkn.Token
@@ -36,8 +37,9 @@ func GetToken() string {
 // Configs return config list
 func Configs() *DataBase {
 	var db DataBase
-
-	if _, err := toml.DecodeFile(methods.GetPath(path), &db); err != nil {
+	
+	p := methods.GetPath(path)
+	if _, err := toml.DecodeFile(p, &db); err != nil {
 		log.Fatalf("Configs not received: %v\n%v", err, db)
 	}
 	return &db

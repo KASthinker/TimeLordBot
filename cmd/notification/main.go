@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"os"
 
 	db "github.com/KASthinker/TimeLordBot/internal/database"
 
@@ -16,6 +17,14 @@ import (
 )
 
 func main() {
+	file, err := os.OpenFile("notification_log.txt", os.O_APPEND|os.O_WRONLY, 0600)
+    if err != nil{ 
+        os.Exit(1) 
+    }
+    defer file.Close() 
+
+	log.SetOutput(file)
+
 	for {
 		users, err := db.GetUsers()
 		if err != nil {
