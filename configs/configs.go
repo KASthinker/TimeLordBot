@@ -8,7 +8,7 @@ import (
 	"github.com/KASthinker/TimeLordBot/internal/methods"
 )
 
-const path = "/configs/helpconf.toml"
+const path = "/configs/configs.toml"
 
 // Token ...
 type Token struct {
