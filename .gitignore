@@ -2,4 +2,3 @@ bot
 configs/helpconf.toml
 log.txt
 main
-Makefile
