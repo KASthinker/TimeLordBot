@@ -5,5 +5,3 @@ build:
 	mkdir ../bot/configs && mkdir ../bot/localization 
 	cp configs/configs.toml ../bot/configs/configs.toml 
 	cp -r localization/lang ../bot/localization
-	touch ../bot/log.txt
-	touch ../bot/notification_log.txt
