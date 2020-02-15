@@ -6,9 +6,9 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/cmd/bot/handlers"
 	"github.com/KASthinker/TimeLordBot/configs"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 )
 
 func init() {
@@ -20,11 +20,11 @@ func init() {
 	data.StateWeekdays = make(map[int64]*data.StateWd)
 	data.StateDelete = make(map[int64]*data.StateDel)
 
-	file, err := os.OpenFile("log.txt", os.O_APPEND|os.O_WRONLY, 0600)
-    if err != nil{ 
-        os.Exit(1) 
-    }
-    defer file.Close() 
+	file, err := os.OpenFile("log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		os.Exit(1)
+	}
+	defer file.Close()
 
 	log.SetOutput(file)
 

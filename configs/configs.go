@@ -4,11 +4,9 @@ import (
 	"log"
 
 	"github.com/BurntSushi/toml"
-
-	"github.com/KASthinker/TimeLordBot/internal/methods"
 )
 
-const path = "/configs/configs.toml"
+const path = "./configs/helpconf.toml"
 
 // Token ...
 type Token struct {
@@ -26,9 +24,8 @@ type DataBase struct {
 // GetToken will return the value of the token
 func GetToken() string {
 	var tkn Token
-	
-	p := methods.GetPath(path)
-	if _, err := toml.DecodeFile(p, &tkn); err != nil {
+
+	if _, err := toml.DecodeFile(path, &tkn); err != nil {
 		log.Fatalf("Token not received: %v", err)
 	}
 	return tkn.Token
@@ -37,9 +34,8 @@ func GetToken() string {
 // Configs return config list
 func Configs() *DataBase {
 	var db DataBase
-	
-	p := methods.GetPath(path)
-	if _, err := toml.DecodeFile(p, &db); err != nil {
+
+	if _, err := toml.DecodeFile(path, &db); err != nil {
 		log.Fatalf("Configs not received: %v\n%v", err, db)
 	}
 	return &db
