@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-
-	"github.com/KASthinker/TimeLordBot/internal/methods"
 )
 
 var language = map[string]string{
@@ -18,7 +16,7 @@ func Translate(lang string, typeText string, text string) string {
 
 	type trText map[string]map[string]string
 	var data trText
-	path := methods.GetPath("/localization/lang/")
+	path := "./localization/lang/"
 
 	if lang, ok := language[lang]; ok {
 		path = path + lang

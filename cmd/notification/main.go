@@ -5,10 +5,10 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
-	"os"
 
 	db "github.com/KASthinker/TimeLordBot/internal/database"
 
@@ -17,11 +17,19 @@ import (
 )
 
 func main() {
+<<<<<<< HEAD
+	file, err := os.OpenFile("notyfication_log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		os.Exit(1)
+	}
+	defer file.Close()
+=======
 	file, err := os.OpenFile("notification_log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
     if err != nil{ 
         os.Exit(1) 
     }
     defer file.Close() 
+>>>>>>> master
 
 	log.SetOutput(file)
 
@@ -40,7 +48,6 @@ func main() {
 }
 
 func checkTasks(user db.Users) {
-	//resp := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage", configs.GetToken())
 	tasks, err := db.TodayTasks(user.UserID, user.TimeZone)
 	if err != nil {
 		log.Fatalln(err)

@@ -3,8 +3,8 @@ package handlers
 import (
 	"fmt"
 
-	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/internal/buttons"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 	db "github.com/KASthinker/TimeLordBot/internal/database"
 	"github.com/KASthinker/TimeLordBot/internal/methods"
 	lang "github.com/KASthinker/TimeLordBot/localization"
@@ -108,6 +108,8 @@ func MessageHandler(message *tgbotapi.Message) {
 	switch message.Text {
 	case "Yes", "Да":
 		if user.Stage == "reg_finaly" {
+			go data.Bot.DeleteMessage(
+				tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
 			err := db.NewUser(user, message.Chat.ID)
 			if err != nil {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
@@ -166,8 +168,7 @@ func MessageHandler(message *tgbotapi.Message) {
 			} else {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Your account has been deleted. Goodbye!")
-				user.Stage = ""
-				user.Registered = false
+				delete(data.UserDataMap, message.Chat.ID)
 			}
 		} else {
 			user.Stage = ""
@@ -235,6 +236,8 @@ func MessageHandler(message *tgbotapi.Message) {
 			}
 		} else {
 			if user.Stage == "reg_check_timezone" {
+				go data.Bot.DeleteMessage(
+					tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
 				// Manually input timezone
 				loctime, tz, err := methods.TimeZoneManually(message.Text, user.TimeFormat)
 				if err != nil {
