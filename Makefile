@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .PHONY: all dir bot notification initDB
 
 all: dir bot notification initDB
@@ -21,12 +20,3 @@ notification:
 initDB:
 	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o bin/bot/init_db scripts/init_db.go
 	@echo [OK]: The initDB is built.
-=======
-build:
-	go build -o ../bot/bot cmd/bot/main.go 
-	go build -o ../bot/notification cmd/notification/main.go 
-	go build -o ../bot/initdb scripts/init_db.go
-	mkdir ../bot/configs && mkdir ../bot/localization 
-	cp configs/configs.toml ../bot/configs/configs.toml 
-	cp -r localization/lang ../bot/localization
->>>>>>> master
