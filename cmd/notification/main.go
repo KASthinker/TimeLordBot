@@ -17,11 +17,19 @@ import (
 )
 
 func main() {
+<<<<<<< HEAD
 	file, err := os.OpenFile("notyfication_log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		os.Exit(1)
 	}
 	defer file.Close()
+=======
+	file, err := os.OpenFile("notification_log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+    if err != nil{ 
+        os.Exit(1) 
+    }
+    defer file.Close() 
+>>>>>>> master
 
 	log.SetOutput(file)
 

@@ -21,18 +21,25 @@ func init() {
 	data.StateDelete = make(map[int64]*data.StateDel)
 
 	file, err := os.OpenFile("log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+<<<<<<< HEAD
 	if err != nil {
 		os.Exit(1)
 	}
 	defer file.Close()
+=======
+    if err != nil{ 
+        os.Exit(1) 
+    }
+    defer file.Close() 
+>>>>>>> master
 
 	log.SetOutput(file)
 
 	data.Bot, data.Err = tgbotapi.NewBotAPI(configs.GetToken())
 	if data.Err != nil {
-		log.Println(data.Err)
+		log.Fatalln(data.Err)
 	}
-	data.Bot.Debug = false
+	data.Bot.Debug = true
 
 	log.Printf("Authorized on account %s", data.Bot.Self.UserName)
 }
