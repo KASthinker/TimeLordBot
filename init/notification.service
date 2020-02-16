@@ -6,8 +6,8 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/usr/local/bin/bot
-ExecStart=/usr/local/bin/bot/notification
+WorkingDirectory=/user/KASthinker/bot
+ExecStart=/home/KASthinker/bot/notification
 RestartSec=10
 Restart=always
  

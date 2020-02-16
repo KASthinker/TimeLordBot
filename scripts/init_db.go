@@ -19,7 +19,9 @@ var (
 func main() {
 	conf := configs.Configs()
 	once.Do(func() {
-		db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", conf.User, conf.Password, conf.DBname))
+		db, err = sql.Open("mysql", 
+		fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", 
+				conf.User, conf.Password, conf.Host, conf.DBname))
 	})
 
 	if err != nil {

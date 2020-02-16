@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/configs"
@@ -25,12 +26,17 @@ type Users struct {
 var (
 	err error
 	db  *sql.DB
+	once sync.Once
 )
 
 //Connect ...
 func Connect() (*sql.DB, error) {
 	conf := configs.Configs()
-	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", conf.User, conf.Password, conf.DBname))
+	once.Do(func() {
+		db, err = sql.Open("mysql", 
+		fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", 
+				conf.User, conf.Password, conf.Host, conf.DBname))
+	})
 
 	if err != nil {
 		return nil, err
