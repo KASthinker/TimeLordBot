@@ -50,7 +50,7 @@ func IfUserExists(userID int64) bool {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
+
 	strUserID := fmt.Sprintf("'%v'", userID)
 	row := db.QueryRow(fmt.Sprintf("SHOW TABLES LIKE %v;", strUserID))
 
@@ -67,7 +67,7 @@ func NewUser(user *data.UserData, userID int64) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
+	
 	strUserID := fmt.Sprintf("`%v`", userID)
 	_, err = db.Exec(fmt.Sprintf(`
 		CREATE TABLE %v (
@@ -102,7 +102,7 @@ func GetUserData(userID int64, user *data.UserData) {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
+	
 	row := db.QueryRow(fmt.Sprintf(
 		"SELECT language, timezone, time_format FROM Users WHERE user_id=%v", strUserID))
 	err = row.Scan(&user.Language, &user.Timezone, &user.TimeFormat)
@@ -118,7 +118,6 @@ func DeleteUserAccount(userID int64) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(fmt.Sprintf(`DELETE FROM Users WHERE user_id=%v;`, strUserID))
@@ -142,7 +141,6 @@ func ChangeLanguage(userID int64, lang string) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(
@@ -161,7 +159,6 @@ func ChangeTimeZone(userID int64, tz string) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(
@@ -180,7 +177,6 @@ func ChangeTimeFormat(userID int64, tf int) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(
@@ -199,7 +195,6 @@ func AddNewTask(userID int64, task *data.Task) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("`%v`", userID)
 	_, err = db.Exec(fmt.Sprintf(`
@@ -220,7 +215,6 @@ func GetTasks(userID int64, typeTask string) ([]data.Task, error) {
 		log.Println(err)
 		return nil, err
 	}
-	defer db.Close()
 
 	rows, err := db.Query(
 		fmt.Sprintf("SELECT * FROM `%v` WHERE type_task='%v'", userID, typeTask))
@@ -228,7 +222,6 @@ func GetTasks(userID int64, typeTask string) ([]data.Task, error) {
 		log.Println(err)
 		return nil, err
 	}
-	defer rows.Close()
 
 	tasks := make([]data.Task, 0)
 	for rows.Next() {
@@ -254,7 +247,6 @@ func DeleteTask(userID int64, ID int) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("`%v`", userID)
 	_, err = db.Exec(fmt.Sprintf("DELETE FROM %v WHERE id=%v;", strUserID, ID))
@@ -272,7 +264,6 @@ func TodayTasks(userID int64, tz string) ([]data.Task, error) {
 		log.Println(err)
 		return nil, err
 	}
-	defer db.Close()
 
 	date, err := methods.LocDate(tz)
 	if err != nil {
@@ -327,7 +318,6 @@ func GetUsers() ([]Users, error) {
 		log.Println(err)
 		return nil, err
 	}
-	defer db.Close()
 
 	rows, err := db.Query("SELECT user_id, language, timezone FROM Users")
 	if err != nil {
