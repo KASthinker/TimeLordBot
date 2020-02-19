@@ -37,9 +37,9 @@ func Connect() (*sql.DB, error) {
 			fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
 				conf.User, conf.Password, conf.Host, conf.DBname))
 	})
-
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		once = sync.Once{}
 	}
 	return db, nil
 }
@@ -50,7 +50,7 @@ func IfUserExists(userID int64) bool {
 	if err != nil {
 		log.Println(err)
 	}
-
+	
 	strUserID := fmt.Sprintf("'%v'", userID)
 	row := db.QueryRow(fmt.Sprintf("SHOW TABLES LIKE %v;", strUserID))
 
