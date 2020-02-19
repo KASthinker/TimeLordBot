@@ -16,11 +16,11 @@ func Translate(lang string, typeText string, text string) string {
 	if lang == "" {
 		lang = "en_EN"
 	}
-	
+
 	type trText map[string]map[string]string
 	var data trText
 	path := "./localization/lang/"
-	
+
 	if lang, ok := language[lang]; ok {
 		path = path + lang
 	} else {

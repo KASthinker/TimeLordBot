@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/configs"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/internal/methods"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -24,8 +24,8 @@ type Users struct {
 }
 
 var (
-	err error
-	db  *sql.DB
+	err  error
+	db   *sql.DB
 	once sync.Once
 )
 
@@ -33,8 +33,8 @@ var (
 func Connect() (*sql.DB, error) {
 	conf := configs.Configs()
 	once.Do(func() {
-		db, err = sql.Open("mysql", 
-		fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", 
+		db, err = sql.Open("mysql",
+			fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
 				conf.User, conf.Password, conf.Host, conf.DBname))
 	})
 
@@ -67,7 +67,7 @@ func NewUser(user *data.UserData, userID int64) error {
 	if err != nil {
 		log.Println(err)
 	}
-	
+
 	strUserID := fmt.Sprintf("`%v`", userID)
 	_, err = db.Exec(fmt.Sprintf(`
 		CREATE TABLE %v (
@@ -102,7 +102,7 @@ func GetUserData(userID int64, user *data.UserData) {
 	if err != nil {
 		log.Println(err)
 	}
-	
+
 	row := db.QueryRow(fmt.Sprintf(
 		"SELECT language, timezone, time_format FROM Users WHERE user_id=%v", strUserID))
 	err = row.Scan(&user.Language, &user.Timezone, &user.TimeFormat)

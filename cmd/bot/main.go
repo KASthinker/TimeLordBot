@@ -10,7 +10,6 @@ import (
 	"github.com/KASthinker/TimeLordBot/cmd/bot/handlers"
 	"github.com/KASthinker/TimeLordBot/configs"
 	"github.com/KASthinker/TimeLordBot/internal/data"
-	"github.com/KASthinker/TimeLordBot/internal/database"
 )
 
 func main() {
