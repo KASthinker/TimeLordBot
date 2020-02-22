@@ -41,7 +41,7 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		
+
 		for _, user := range users {
 			go checkTasks(user)
 		}
@@ -104,3 +104,5 @@ func sendMessage(user db.Users, text string) {
 		log.Printf("Delete message error -> %v", err)
 	}
 }
+
+

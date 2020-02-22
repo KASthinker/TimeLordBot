@@ -73,13 +73,13 @@ func NewUser(user *data.UserData, userID int64) error {
 		CREATE TABLE %v (
 			id INT NOT NULL AUTO_INCREMENT,
 			type_task VARCHAR(15) NOT NULL,
-			text VARCHAR(255) NOT NULL,
+			text VARCHAR(255) COLLATE utf8mb4_bin NOT NULL,
 			date VARCHAR(10),
 			time TIME NOT NULL,
 			weekday VARCHAR(70),
 			priority VARCHAR(20) NOT NULL,
 			PRIMARY KEY (id)
-		);`, strUserID))
+		) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;`, strUserID))
 	if err != nil {
 		log.Printf("Error in add User table\n%v\n", err)
 		return err
