@@ -50,7 +50,7 @@ func IfUserExists(userID int64) bool {
 	if err != nil {
 		log.Println(err)
 	}
-	
+
 	strUserID := fmt.Sprintf("'%v'", userID)
 	row := db.QueryRow(fmt.Sprintf("SHOW TABLES LIKE %v;", strUserID))
 

@@ -21,6 +21,7 @@ import (
 )
 
 func main() {
+	log.Println("Started!!!")
 	var debug bool
 
 	flag.BoolVar(&debug, "debug", false, "Usage")
@@ -104,5 +105,3 @@ func sendMessage(user db.Users, text string) {
 		log.Printf("Delete message error -> %v", err)
 	}
 }
-
-

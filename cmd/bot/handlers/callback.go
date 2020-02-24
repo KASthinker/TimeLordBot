@@ -442,10 +442,10 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			}
 			if user.TimeFormat == 24 {
 				weekdays.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
-				task.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
+				task.Time = fmt.Sprintf("%02d:%02d:00", state.Hours, state.Minute)
 			} else if user.TimeFormat == 12 {
 				weekdays.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
-				task.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
+				task.Time = fmt.Sprintf("%02d:%02d:00 %s", state.Hours, state.Minute, state.Meridiem)
 			}
 			user.Stage = "new_task_weekdays"
 			sndMsg.Text = lang.Translate(user.Language, typeText,
@@ -460,10 +460,10 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			}
 			if user.TimeFormat == 24 {
 				date.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
-				task.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
+				task.Time = fmt.Sprintf("%02d:%02d:00", state.Hours, state.Minute)
 			} else if user.TimeFormat == 12 {
 				date.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
-				task.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
+				task.Time = fmt.Sprintf("%02d:%02d:00 %s", state.Hours, state.Minute, state.Meridiem)
 			}
 			user.Stage = "new_task_date"
 			sndMsg.Text = lang.Translate(user.Language, typeText,
