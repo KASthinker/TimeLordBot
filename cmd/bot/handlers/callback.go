@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/internal/buttons"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 	db "github.com/KASthinker/TimeLordBot/internal/database"
 	lang "github.com/KASthinker/TimeLordBot/localization"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -18,7 +18,6 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	typeText := "message"
 	message := callback.Message
 	sndMsg := tgbotapi.NewEditMessageText(message.Chat.ID, message.MessageID, "")
-	sndMsg.ParseMode = "Markdown"
 	user, ok := data.UserDataMap[message.Chat.ID]
 	if !ok {
 		if db.IfUserExists(message.Chat.ID) {
@@ -133,6 +132,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 				"Press button:")
 			sndMsg.ReplyMarkup = buttons.SendUserLocation(user.Language)
 			sndMsg.ParseMode = "Markdown"
+			sndMsg.DisableNotification = true
 			go data.Bot.Send(sndMsg)
 			if user.Stage == "reg_timezone" {
 				user.Stage = "reg_check_timezone"
@@ -206,7 +206,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 		sndMsg.ReplyMarkup = buttons.TypeTasks(user.Language)
 	case "today_tasks":
 		user.Stage = "today_tasks"
-		tasks, err := db.TodayTasks(message.Chat.ID, user.Timezone)
+		tasks, err := db.TodayTasks(message.Chat.ID, user.Timezone, user.TimeFormat)
 		if err != nil {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Error getting tasks!")
@@ -222,6 +222,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 						callback.Message.Chat.ID, callback.Message.MessageID))
 				sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
 				sndMsg.ParseMode = "Markdown"
+				sndMsg.DisableNotification = true
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Task list:")
 				data.Bot.Send(sndMsg)
@@ -263,7 +264,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			case "holiday_task":
 				typeTask = "Holiday"
 			}
-			tasks, err := db.GetTasks(message.Chat.ID, typeTask)
+			tasks, err := db.GetTasks(message.Chat.ID, typeTask, user.TimeFormat)
 			if err != nil {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Error getting tasks!")
@@ -279,6 +280,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 							callback.Message.Chat.ID, callback.Message.MessageID))
 					sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
 					sndMsg.ParseMode = "Markdown"
+					sndMsg.DisableNotification = true
 					sndMsg.Text = lang.Translate(user.Language, typeText,
 						"Task list:")
 					data.Bot.Send(sndMsg)
@@ -306,7 +308,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			case "holiday_task":
 				typeTask = "Holiday"
 			}
-			tasks, err := db.GetTasks(message.Chat.ID, typeTask)
+			tasks, err := db.GetTasks(message.Chat.ID, typeTask, user.TimeFormat)
 			if err != nil {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Error deleting tasks. Select an action:")
@@ -331,12 +333,14 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 						sndMsg.Text = fmt.Sprintf("№%v\n%v", i+1, tasks[i].GetTask(user.Language))
 						sndMsg.ReplyMarkup = buttons.SelectDelTask(user.Language, i+1, stateDel)
 						sndMsg.ParseMode = "Markdown"
+						sndMsg.DisableNotification = true
 						data.Bot.Send(sndMsg)
 					}
 					stateDel.StatusMessage = message.MessageID + len(tasks) + 1
 					sndMsg.Text = lang.Translate(user.Language, typeText, "Stage:")
 					sndMsg.ReplyMarkup = buttons.DelTask(user.Language, 0)
 					sndMsg.ParseMode = "Markdown"
+					sndMsg.DisableNotification = true
 					data.Bot.Send(sndMsg)
 				} else {
 					sndMsg.Text = lang.Translate(user.Language, typeText,
@@ -442,10 +446,10 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			}
 			if user.TimeFormat == 24 {
 				weekdays.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
-				task.Time = fmt.Sprintf("%02d:%02d:00", state.Hours, state.Minute)
+				task.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
 			} else if user.TimeFormat == 12 {
 				weekdays.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
-				task.Time = fmt.Sprintf("%02d:%02d:00 %s", state.Hours, state.Minute, state.Meridiem)
+				task.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
 			}
 			user.Stage = "new_task_weekdays"
 			sndMsg.Text = lang.Translate(user.Language, typeText,
@@ -460,10 +464,10 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			}
 			if user.TimeFormat == 24 {
 				date.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
-				task.Time = fmt.Sprintf("%02d:%02d:00", state.Hours, state.Minute)
+				task.Time = fmt.Sprintf("%02d:%02d", state.Hours, state.Minute)
 			} else if user.TimeFormat == 12 {
 				date.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
-				task.Time = fmt.Sprintf("%02d:%02d:00 %s", state.Hours, state.Minute, state.Meridiem)
+				task.Time = fmt.Sprintf("%02d:%02d %s", state.Hours, state.Minute, state.Meridiem)
 			}
 			user.Stage = "new_task_date"
 			sndMsg.Text = lang.Translate(user.Language, typeText,
@@ -612,6 +616,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 				sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
 				sndMsg.Text = lang.Translate(user.Language, typeText, "Deleted!")
 				sndMsg.ParseMode = "Markdown"
+				sndMsg.DisableNotification = true
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				data.Bot.Send(sndMsg)
 				user.Stage = ""
@@ -642,6 +647,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			"Action canceled! Select an action:")
 		sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 		sndMsg.ParseMode = "Markdown"
+		sndMsg.DisableNotification = true
 		go data.Bot.Send(sndMsg)
 		return
 	case "hide":
@@ -655,6 +661,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 				"Select an action:")
 			sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 			sndMsg.ParseMode = "Markdown"
+			sndMsg.DisableNotification = true
 			go data.Bot.Send(sndMsg)
 			return
 		}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/KASthinker/TimeLordBot/configs"
 	"github.com/KASthinker/TimeLordBot/internal/data"
@@ -189,6 +190,37 @@ func ChangeTimeFormat(userID int64, tf int) error {
 	return nil
 }
 
+func convTimeFormat(strTime string, timeFormat int) (string, error) {
+	var layout string
+	switch timeFormat {
+	case 24:
+		layout = "15:04"
+	case 12:
+		layout = "03:04 PM"
+	default:
+		err := fmt.Errorf("Wrong time format! -> %d", timeFormat)
+		return "", err
+	}
+	
+	t, err := time.Parse(layout, strTime)
+	if err != nil {
+		var layout string
+		switch timeFormat {
+		case 24:
+			layout = "03:04 PM"
+		case 12:
+			layout = "15:04"
+		}
+		t, err = time.Parse(layout, strTime)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return t.Format(layout), nil
+
+}
+
 //AddNewTask ...
 func AddNewTask(userID int64, task *data.Task) error {
 	db, err = Connect()
@@ -196,11 +228,16 @@ func AddNewTask(userID int64, task *data.Task) error {
 		log.Println(err)
 	}
 
+	strTime, err := convTimeFormat(task.Time, 24)
+	if err != nil {
+		log.Printf("Convert time format error -> %v", err)
+	}
+
 	strUserID := fmt.Sprintf("`%v`", userID)
 	_, err = db.Exec(fmt.Sprintf(`
 		INSERT INTO %v (type_task, text, time, date, weekday, priority) 
 		VALUES ('%v','%v','%v','%v','%v','%v');`, strUserID, task.TypeTask, task.Text,
-		task.Time, task.Date, task.WeekDay, task.Priority))
+		strTime, task.Date, task.WeekDay, task.Priority))
 	if err != nil {
 		log.Printf("\n\nError in insert line\n%v\n\n\n", err)
 		return err
@@ -209,7 +246,7 @@ func AddNewTask(userID int64, task *data.Task) error {
 }
 
 // GetTasks ...
-func GetTasks(userID int64, typeTask string) ([]data.Task, error) {
+func GetTasks(userID int64, typeTask string, timeFormat int) ([]data.Task, error) {
 	db, err = Connect()
 	if err != nil {
 		log.Println(err)
@@ -232,6 +269,13 @@ func GetTasks(userID int64, typeTask string) ([]data.Task, error) {
 			log.Println(err)
 			return nil, err
 		}
+		tm := strings.Split(task.Time, ":")
+		task.Time = fmt.Sprintf("%v:%v", tm[0], tm[1])
+		strTime, err := convTimeFormat(task.Time, timeFormat)
+		if err != nil {
+			log.Printf("Convert time format error -> %v", err)
+		}
+		task.Time = strTime
 		tasks = append(tasks, *task)
 	}
 	if err = rows.Err(); err != nil {
@@ -258,7 +302,7 @@ func DeleteTask(userID int64, ID int) error {
 }
 
 // TodayTasks ...
-func TodayTasks(userID int64, tz string) ([]data.Task, error) {
+func TodayTasks(userID int64, tz string, timeFormat int) ([]data.Task, error) {
 	db, err := Connect()
 	if err != nil {
 		log.Println(err)
@@ -302,6 +346,13 @@ func TodayTasks(userID int64, tz string) ([]data.Task, error) {
 				continue
 			}
 		}
+		tm := strings.Split(task.Time, ":")
+		task.Time = fmt.Sprintf("%v:%v", tm[0], tm[1])
+		strTime, err := convTimeFormat(task.Time, timeFormat)
+		if err != nil {
+			log.Printf("Convert time format error -> %v", err)
+		}
+		task.Time = strTime
 		tasks = append(tasks, *task)
 	}
 	if err = rows.Err(); err != nil {
