@@ -261,5 +261,6 @@ func MessageHandler(message *tgbotapi.Message) {
 		}
 	}
 	sndMsg.ParseMode = "Markdown"
+	sndMsg.DisableNotification = true
 	go data.Bot.Send(sndMsg)
 }

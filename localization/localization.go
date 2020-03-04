@@ -13,6 +13,9 @@ var language = map[string]string{
 
 // Translate srting
 func Translate(lang string, typeText string, text string) string {
+	if lang == "" {
+		lang = "en_EN"
+	}
 
 	type trText map[string]map[string]string
 	var data trText
@@ -21,7 +24,7 @@ func Translate(lang string, typeText string, text string) string {
 	if lang, ok := language[lang]; ok {
 		path = path + lang
 	} else {
-		log.Fatal("Invalid language!")
+		log.Fatalf("Invalid language! -> %v", lang)
 	}
 
 	file, err := ioutil.ReadFile(path)

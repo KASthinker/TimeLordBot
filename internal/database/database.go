@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
+	"time"
 
-	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/configs"
+	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/internal/methods"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -23,17 +25,22 @@ type Users struct {
 }
 
 var (
-	err error
-	db  *sql.DB
+	err  error
+	db   *sql.DB
+	once sync.Once
 )
 
 //Connect ...
 func Connect() (*sql.DB, error) {
 	conf := configs.Configs()
-	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", conf.User, conf.Password, conf.DBname))
-
+	once.Do(func() {
+		db, err = sql.Open("mysql",
+			fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
+				conf.User, conf.Password, conf.Host, conf.DBname))
+	})
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		once = sync.Once{}
 	}
 	return db, nil
 }
@@ -44,7 +51,7 @@ func IfUserExists(userID int64) bool {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
+
 	strUserID := fmt.Sprintf("'%v'", userID)
 	row := db.QueryRow(fmt.Sprintf("SHOW TABLES LIKE %v;", strUserID))
 
@@ -61,19 +68,19 @@ func NewUser(user *data.UserData, userID int64) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
+
 	strUserID := fmt.Sprintf("`%v`", userID)
 	_, err = db.Exec(fmt.Sprintf(`
 		CREATE TABLE %v (
 			id INT NOT NULL AUTO_INCREMENT,
 			type_task VARCHAR(15) NOT NULL,
-			text VARCHAR(255) NOT NULL,
+			text VARCHAR(255) COLLATE utf8mb4_bin NOT NULL,
 			date VARCHAR(10),
 			time TIME NOT NULL,
 			weekday VARCHAR(70),
 			priority VARCHAR(20) NOT NULL,
 			PRIMARY KEY (id)
-		);`, strUserID))
+		) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;`, strUserID))
 	if err != nil {
 		log.Printf("Error in add User table\n%v\n", err)
 		return err
@@ -96,7 +103,7 @@ func GetUserData(userID int64, user *data.UserData) {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
+
 	row := db.QueryRow(fmt.Sprintf(
 		"SELECT language, timezone, time_format FROM Users WHERE user_id=%v", strUserID))
 	err = row.Scan(&user.Language, &user.Timezone, &user.TimeFormat)
@@ -112,7 +119,6 @@ func DeleteUserAccount(userID int64) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(fmt.Sprintf(`DELETE FROM Users WHERE user_id=%v;`, strUserID))
@@ -136,7 +142,6 @@ func ChangeLanguage(userID int64, lang string) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(
@@ -155,7 +160,6 @@ func ChangeTimeZone(userID int64, tz string) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(
@@ -174,7 +178,6 @@ func ChangeTimeFormat(userID int64, tf int) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("'%v'", userID)
 	_, err = db.Exec(
@@ -187,19 +190,54 @@ func ChangeTimeFormat(userID int64, tf int) error {
 	return nil
 }
 
+func convTimeFormat(strTime string, timeFormat int) (string, error) {
+	var layout string
+	switch timeFormat {
+	case 24:
+		layout = "15:04"
+	case 12:
+		layout = "03:04 PM"
+	default:
+		err := fmt.Errorf("Wrong time format! -> %d", timeFormat)
+		return "", err
+	}
+	
+	t, err := time.Parse(layout, strTime)
+	if err != nil {
+		var layout string
+		switch timeFormat {
+		case 24:
+			layout = "03:04 PM"
+		case 12:
+			layout = "15:04"
+		}
+		t, err = time.Parse(layout, strTime)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return t.Format(layout), nil
+
+}
+
 //AddNewTask ...
 func AddNewTask(userID int64, task *data.Task) error {
 	db, err = Connect()
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
+
+	strTime, err := convTimeFormat(task.Time, 24)
+	if err != nil {
+		log.Printf("Convert time format error -> %v", err)
+	}
 
 	strUserID := fmt.Sprintf("`%v`", userID)
 	_, err = db.Exec(fmt.Sprintf(`
 		INSERT INTO %v (type_task, text, time, date, weekday, priority) 
 		VALUES ('%v','%v','%v','%v','%v','%v');`, strUserID, task.TypeTask, task.Text,
-		task.Time, task.Date, task.WeekDay, task.Priority))
+		strTime, task.Date, task.WeekDay, task.Priority))
 	if err != nil {
 		log.Printf("\n\nError in insert line\n%v\n\n\n", err)
 		return err
@@ -208,13 +246,12 @@ func AddNewTask(userID int64, task *data.Task) error {
 }
 
 // GetTasks ...
-func GetTasks(userID int64, typeTask string) ([]data.Task, error) {
+func GetTasks(userID int64, typeTask string, timeFormat int) ([]data.Task, error) {
 	db, err = Connect()
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	defer db.Close()
 
 	rows, err := db.Query(
 		fmt.Sprintf("SELECT * FROM `%v` WHERE type_task='%v'", userID, typeTask))
@@ -222,7 +259,6 @@ func GetTasks(userID int64, typeTask string) ([]data.Task, error) {
 		log.Println(err)
 		return nil, err
 	}
-	defer rows.Close()
 
 	tasks := make([]data.Task, 0)
 	for rows.Next() {
@@ -233,6 +269,13 @@ func GetTasks(userID int64, typeTask string) ([]data.Task, error) {
 			log.Println(err)
 			return nil, err
 		}
+		tm := strings.Split(task.Time, ":")
+		task.Time = fmt.Sprintf("%v:%v", tm[0], tm[1])
+		strTime, err := convTimeFormat(task.Time, timeFormat)
+		if err != nil {
+			log.Printf("Convert time format error -> %v", err)
+		}
+		task.Time = strTime
 		tasks = append(tasks, *task)
 	}
 	if err = rows.Err(); err != nil {
@@ -248,7 +291,6 @@ func DeleteTask(userID int64, ID int) error {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 
 	strUserID := fmt.Sprintf("`%v`", userID)
 	_, err = db.Exec(fmt.Sprintf("DELETE FROM %v WHERE id=%v;", strUserID, ID))
@@ -260,13 +302,12 @@ func DeleteTask(userID int64, ID int) error {
 }
 
 // TodayTasks ...
-func TodayTasks(userID int64, tz string) ([]data.Task, error) {
+func TodayTasks(userID int64, tz string, timeFormat int) ([]data.Task, error) {
 	db, err := Connect()
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	defer db.Close()
 
 	date, err := methods.LocDate(tz)
 	if err != nil {
@@ -305,6 +346,13 @@ func TodayTasks(userID int64, tz string) ([]data.Task, error) {
 				continue
 			}
 		}
+		tm := strings.Split(task.Time, ":")
+		task.Time = fmt.Sprintf("%v:%v", tm[0], tm[1])
+		strTime, err := convTimeFormat(task.Time, timeFormat)
+		if err != nil {
+			log.Printf("Convert time format error -> %v", err)
+		}
+		task.Time = strTime
 		tasks = append(tasks, *task)
 	}
 	if err = rows.Err(); err != nil {
@@ -321,7 +369,6 @@ func GetUsers() ([]Users, error) {
 		log.Println(err)
 		return nil, err
 	}
-	defer db.Close()
 
 	rows, err := db.Query("SELECT user_id, language, timezone FROM Users")
 	if err != nil {
