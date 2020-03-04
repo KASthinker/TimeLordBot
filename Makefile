@@ -22,7 +22,7 @@ notification:
 initDB:
 	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o bin/bot/init_db scripts/init_db.go
 	@echo [OK]: The initDB is built.
-
+  
 archive:
 	@cd ./bin && rm -rf bot.tar.gz && tar -czf bot.tar.gz bot
 	@echo [OK]: Build archived in bot/bin

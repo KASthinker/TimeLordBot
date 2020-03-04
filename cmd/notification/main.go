@@ -24,6 +24,12 @@ func main() {
 	log.Println("Started!!!")
 	var debug bool
 
+	file, err := os.OpenFile("notyfication_log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		os.Exit(1)
+	}
+	defer file.Close()
+
 	flag.BoolVar(&debug, "debug", false, "Usage")
 	flag.Parse()
 
