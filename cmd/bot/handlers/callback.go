@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -678,6 +679,12 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Select the date of notification:")
 			sndMsg.ReplyMarkup = buttons.InputDate(user.Language, date)
+		} else if temp[0] == "hide" && len(temp) == 2 {
+			messageID, err := strconv.Atoi(temp[1])
+			if err != nil {
+				log.Printf("Error Atoi -> %v\n", err)
+			}
+			go data.Bot.DeleteMessage(tgbotapi.NewDeleteMessage(callback.Message.Chat.ID, messageID))
 		} else if temp[0] == "deletetask" && user.Stage == "select_delete_tasks" {
 			stateDel, ok := data.StateDelete[message.Chat.ID]
 			if !ok {

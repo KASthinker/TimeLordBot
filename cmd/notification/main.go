@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"flag"
@@ -59,7 +58,7 @@ func main() {
 }
 
 func checkTasks(user db.Users) {
-	tasks, err := db.TodayTasks(user.UserID, user.TimeZone)
+	tasks, err := db.TodayTasks(user.UserID, user.TimeZone, user.TimeFormat)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -70,7 +69,12 @@ func checkTasks(user db.Users) {
 	}
 
 	for _, task := range tasks {
-		if strings.Contains(task.Time, loctime) {
+		tm, err := methods.ConvTimeFormat(task.Time, 24)
+		if err != nil {
+			log.Printf("Convert time format error -> %v", err)
+		}
+
+		if tm == loctime {
 			text := fmt.Sprintf("⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️\n%v🔰🔰🔰🔰🔰🔰🔰🔰🔰🔰🔰🔰",
 				task.GetTask(user.Language))
 			sendMessage(user, text)
@@ -86,14 +90,12 @@ type dataMessage struct {
 }
 
 func sendMessage(user db.Users, text string) {
-	keyboard := buttons.StartButtons(user.Language)
-	byteKeyboard, _ := json.Marshal(keyboard)
-
 	resp, err := http.PostForm(
 		fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage", configs.GetToken()),
-		url.Values{"chat_id": {strconv.Itoa(int(user.UserID))},
-			"text": {text}, "parse_mode": {"Markdown"},
-			"reply_markup": {string(byteKeyboard)}})
+		url.Values{
+			"chat_id":    {strconv.Itoa(int(user.UserID))},
+			"text":       {text},
+			"parse_mode": {"Markdown"}})
 
 	if err != nil {
 		log.Printf("Send message error -> %v", err)
@@ -102,11 +104,27 @@ func sendMessage(user db.Users, text string) {
 	data := dataMessage{}
 	json.NewDecoder(resp.Body).Decode(&data)
 
-	strMessageID := strconv.Itoa(data.Result.MessageID - 1)
-	_, err = http.PostForm(
-		fmt.Sprintf("https://api.telegram.org/bot%v/deleteMessage", configs.GetToken()),
-		url.Values{"chat_id": {strconv.Itoa(int(user.UserID))}, "message_id": {strMessageID}})
+	strMessageID := strconv.Itoa(data.Result.MessageID)
+	keyboard := buttons.HideByMessageID(user.Language, strMessageID)
+	byteKeyboard, _ := json.Marshal(keyboard)
 
+	_, err = http.PostForm(
+		fmt.Sprintf("https://api.telegram.org/bot%v/editMessageReplyMarkup", configs.GetToken()),
+		url.Values{
+			"chat_id":      {strconv.Itoa(int(user.UserID))},
+			"message_id":   {strMessageID},
+			"reply_markup": {string(byteKeyboard)}})
+
+	if err != nil {
+		log.Printf("Edit message error -> %v", err)
+	}
+}
+
+func deleteMessage(userID int64, messageID int) {
+	strMessageID := strconv.Itoa(messageID)
+	_, err := http.PostForm(
+		fmt.Sprintf("https://api.telegram.org/bot%v/deleteMessage", configs.GetToken()),
+		url.Values{"chat_id": {strconv.Itoa(int(userID))}, "message_id": {strMessageID}})
 	if err != nil {
 		log.Printf("Delete message error -> %v", err)
 	}
