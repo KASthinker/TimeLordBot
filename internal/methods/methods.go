@@ -152,3 +152,35 @@ func LocWeekday(timezone string) (string, error) {
 
 	return weekday, nil
 }
+
+// ConvTimeFormat ...
+func ConvTimeFormat(strTime string, timeFormat int) (string, error) {
+	var layout string
+	switch timeFormat {
+	case 24:
+		layout = "15:04"
+	case 12:
+		layout = "03:04 PM"
+	default:
+		err := fmt.Errorf("Wrong time format! -> %d", timeFormat)
+		return "", err
+	}
+
+	t, err := time.Parse(layout, strTime)
+	if err != nil {
+		var layout string
+		switch timeFormat {
+		case 24:
+			layout = "03:04 PM"
+		case 12:
+			layout = "15:04"
+		}
+		t, err = time.Parse(layout, strTime)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return t.Format(layout), nil
+
+}

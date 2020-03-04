@@ -6,22 +6,23 @@ import (
 	"log"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/KASthinker/TimeLordBot/configs"
 	"github.com/KASthinker/TimeLordBot/internal/data"
 	"github.com/KASthinker/TimeLordBot/internal/methods"
+
+	// _ ...
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // Users ...
 type Users struct {
-	UserID      int64
 	Language    string
-	TimeFormat  string
 	TypeAccount string
 	TimeZone    string
-	GroupID     string
+	GroupID     interface{}
+	UserID      int64
+	TimeFormat  int
 }
 
 var (
@@ -190,37 +191,6 @@ func ChangeTimeFormat(userID int64, tf int) error {
 	return nil
 }
 
-func convTimeFormat(strTime string, timeFormat int) (string, error) {
-	var layout string
-	switch timeFormat {
-	case 24:
-		layout = "15:04"
-	case 12:
-		layout = "03:04 PM"
-	default:
-		err := fmt.Errorf("Wrong time format! -> %d", timeFormat)
-		return "", err
-	}
-	
-	t, err := time.Parse(layout, strTime)
-	if err != nil {
-		var layout string
-		switch timeFormat {
-		case 24:
-			layout = "03:04 PM"
-		case 12:
-			layout = "15:04"
-		}
-		t, err = time.Parse(layout, strTime)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	return t.Format(layout), nil
-
-}
-
 //AddNewTask ...
 func AddNewTask(userID int64, task *data.Task) error {
 	db, err = Connect()
@@ -228,7 +198,7 @@ func AddNewTask(userID int64, task *data.Task) error {
 		log.Println(err)
 	}
 
-	strTime, err := convTimeFormat(task.Time, 24)
+	strTime, err := methods.ConvTimeFormat(task.Time, 24)
 	if err != nil {
 		log.Printf("Convert time format error -> %v", err)
 	}
@@ -271,7 +241,7 @@ func GetTasks(userID int64, typeTask string, timeFormat int) ([]data.Task, error
 		}
 		tm := strings.Split(task.Time, ":")
 		task.Time = fmt.Sprintf("%v:%v", tm[0], tm[1])
-		strTime, err := convTimeFormat(task.Time, timeFormat)
+		strTime, err := methods.ConvTimeFormat(task.Time, timeFormat)
 		if err != nil {
 			log.Printf("Convert time format error -> %v", err)
 		}
@@ -348,7 +318,7 @@ func TodayTasks(userID int64, tz string, timeFormat int) ([]data.Task, error) {
 		}
 		tm := strings.Split(task.Time, ":")
 		task.Time = fmt.Sprintf("%v:%v", tm[0], tm[1])
-		strTime, err := convTimeFormat(task.Time, timeFormat)
+		strTime, err := methods.ConvTimeFormat(task.Time, timeFormat)
 		if err != nil {
 			log.Printf("Convert time format error -> %v", err)
 		}
@@ -370,7 +340,7 @@ func GetUsers() ([]Users, error) {
 		return nil, err
 	}
 
-	rows, err := db.Query("SELECT user_id, language, timezone FROM Users")
+	rows, err := db.Query("SELECT * FROM Users")
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -380,7 +350,9 @@ func GetUsers() ([]Users, error) {
 	var users []Users
 	for rows.Next() {
 		var user Users
-		err := rows.Scan(&user.UserID, &user.Language, &user.TimeZone)
+		err := rows.Scan(
+			&user.UserID, &user.Language, &user.TypeAccount,
+			&user.TimeZone, &user.TimeFormat, &user.GroupID)
 		if err != nil {
 			log.Println(err)
 			return nil, err

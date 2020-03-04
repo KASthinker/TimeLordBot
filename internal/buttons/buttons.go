@@ -461,3 +461,14 @@ func HideButton(lang string) *tgbotapi.InlineKeyboardMarkup {
 	)
 	return &keyboard
 }
+
+// HideByMessageID ...
+func HideByMessageID(lang string, messageID string) *tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				loc.Translate(lang, typeText, "Hide"), fmt.Sprintf("hide/%s", messageID)),
+		),
+	)
+	return &keyboard
+}
