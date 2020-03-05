@@ -79,7 +79,7 @@
         "Try again. Enter your time zone:": "*Try again. Enter your time zone:*",
         "Enter your time zone. Example Los Angeles \"-8\", Moscow \"+3\":": "*Enter your time zone. Example Los Angeles* \"-8\", Moscow \"+3\":",
         "Account not found! Please register! To register, enter /start.": "*Account not found! Please register!* To register, enter /start.",
-        "Press button:": "*Press button:*",
+        "Press button:": "*Press button:*\n*Cancel* - /cancel",
         "Is your time ": "*Is your time* ",
         "Registration completed successfully. Select an action:": "*Registration completed successfully.\nSelect an action:*",
         "Invalid command. Enter /start": "*Invalid command.* Enter /start",

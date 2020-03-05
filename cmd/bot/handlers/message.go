@@ -215,14 +215,16 @@ func MessageHandler(message *tgbotapi.Message) {
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Select the notification time:")
 				if user.TimeFormat == 12 {
-					state.Hours = 6
+					state.Hours = 10
 					state.Minute = 0
-					state.Meridiem = "PM"
-					sndMsg.ReplyMarkup = buttons.InputTime12(state.Hours, state.Minute, state.Meridiem)
+					state.Meridiem = "AM"
+					state.Step = 1
+					sndMsg.ReplyMarkup = buttons.InputTime12(state)
 				} else if user.TimeFormat == 24 {
-					state.Hours = 12
+					state.Hours = 10
 					state.Minute = 0
-					sndMsg.ReplyMarkup = buttons.InputTime24(state.Hours, state.Minute)
+					state.Step = 1
+					sndMsg.ReplyMarkup = buttons.InputTime24(state)
 				}
 				/////////////////////////////////////////////////////////////////////
 			} else {

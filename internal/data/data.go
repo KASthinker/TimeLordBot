@@ -62,6 +62,7 @@ type StateTm struct {
 	Meridiem string
 	Hours    int
 	Minute   int
+	Step     int
 }
 
 // StateDt ...
