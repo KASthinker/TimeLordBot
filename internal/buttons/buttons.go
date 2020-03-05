@@ -218,22 +218,40 @@ func Language() *tgbotapi.InlineKeyboardMarkup {
 	return &keyboard
 }
 
+var stepMap = map[int]string{
+	1:  "1️⃣",
+	5:  "5️⃣",
+	10: "🔟",
+}
+
+var arrowUpMap = map[int]string{
+	1:  "🔼",
+	5:  "⏫",
+	10: "⏫",
+}
+
+var arrowDownMap = map[int]string{
+	1:  "🔽",
+	5:  "⏬",
+	10: "⏬",
+}
+
 // InputTime24 ...
-func InputTime24(hours, minute int) *tgbotapi.InlineKeyboardMarkup {
+func InputTime24(state *data.StateTm) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔼", "upHours"),
-			tgbotapi.NewInlineKeyboardButtonData("🔼", "upMinute"),
-			tgbotapi.NewInlineKeyboardButtonData(" ", "empty"),
+			tgbotapi.NewInlineKeyboardButtonData(arrowUpMap[state.Step], "upHours"),
+			tgbotapi.NewInlineKeyboardButtonData(arrowUpMap[state.Step], "upMinute"),
+			tgbotapi.NewInlineKeyboardButtonData(stepMap[state.Step], "step"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", hours), "empty"),
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", minute), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", state.Hours), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", state.Minute), "empty"),
 			tgbotapi.NewInlineKeyboardButtonData("🆗", "TimeOK"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔽", "downHours"),
-			tgbotapi.NewInlineKeyboardButtonData("🔽", "downMinute"),
+			tgbotapi.NewInlineKeyboardButtonData(arrowDownMap[state.Step], "downHours"),
+			tgbotapi.NewInlineKeyboardButtonData(arrowDownMap[state.Step], "downMinute"),
 			tgbotapi.NewInlineKeyboardButtonData(" ", "empty"),
 		),
 	)
@@ -242,23 +260,23 @@ func InputTime24(hours, minute int) *tgbotapi.InlineKeyboardMarkup {
 }
 
 // InputTime12 ...
-func InputTime12(hours, minute int, meridiem string) *tgbotapi.InlineKeyboardMarkup {
+func InputTime12(state *data.StateTm) *tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔼", "upHours"),
-			tgbotapi.NewInlineKeyboardButtonData("🔼", "upMinute"),
+			tgbotapi.NewInlineKeyboardButtonData(arrowUpMap[state.Step], "upHours"),
+			tgbotapi.NewInlineKeyboardButtonData(arrowUpMap[state.Step], "upMinute"),
 			tgbotapi.NewInlineKeyboardButtonData("🔼", "changeMeridiem"),
-			tgbotapi.NewInlineKeyboardButtonData(" ", " "),
+			tgbotapi.NewInlineKeyboardButtonData(stepMap[state.Step], "step"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", hours), "empty"),
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", minute), "empty"),
-			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%-2s", meridiem), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", state.Hours), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%02d", state.Minute), "empty"),
+			tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%-2s", state.Meridiem), "empty"),
 			tgbotapi.NewInlineKeyboardButtonData("🆗", "TimeOK"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🔽", "downHours"),
-			tgbotapi.NewInlineKeyboardButtonData("🔽", "downMinute"),
+			tgbotapi.NewInlineKeyboardButtonData(arrowDownMap[state.Step], "downHours"),
+			tgbotapi.NewInlineKeyboardButtonData(arrowDownMap[state.Step], "downMinute"),
 			tgbotapi.NewInlineKeyboardButtonData("🔽", "changeMeridiem"),
 			tgbotapi.NewInlineKeyboardButtonData(" ", "empty"),
 		),

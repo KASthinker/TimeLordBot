@@ -356,75 +356,75 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 	case "upHours": // Не работает сука
 		if user.Stage == "new_task_time" {
 			if user.TimeFormat == 24 {
-				if state.Hours < 23 {
-					state.Hours++
+				if state.Hours+state.Step < 24 {
+					state.Hours += state.Step
 				} else {
-					state.Hours = 0
+					state.Hours = state.Hours + state.Step - 24
 				}
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Select the notification time:")
-				sndMsg.ReplyMarkup = buttons.InputTime24(state.Hours, state.Minute)
+				sndMsg.ReplyMarkup = buttons.InputTime24(state)
 			} else if user.TimeFormat == 12 {
-				if state.Hours < 12 {
-					state.Hours++
+				if state.Hours+state.Step <= 12 {
+					state.Hours += state.Step
 				} else {
-					state.Hours = 1
+					state.Hours = state.Hours + state.Step - 12
 				}
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Select the notification time:")
-				sndMsg.ReplyMarkup = buttons.InputTime12(state.Hours, state.Minute, state.Meridiem)
+				sndMsg.ReplyMarkup = buttons.InputTime12(state)
 			}
 		}
 	case "downHours":
 		if user.Stage == "new_task_time" {
 			if user.TimeFormat == 24 {
-				if state.Hours > 0 {
-					state.Hours--
+				if state.Hours-state.Step >= 0 {
+					state.Hours -= state.Step
 				} else {
-					state.Hours = 23
+					state.Hours = state.Hours - state.Step + 24
 				}
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Select the notification time:")
-				sndMsg.ReplyMarkup = buttons.InputTime24(state.Hours, state.Minute)
+				sndMsg.ReplyMarkup = buttons.InputTime24(state)
 			} else if user.TimeFormat == 12 {
-				if state.Hours > 1 {
-					state.Hours--
+				if state.Hours-state.Step >= 1 {
+					state.Hours -= state.Step
 				} else {
-					state.Hours = 12
+					state.Hours = state.Hours - state.Step + 12
 				}
 				sndMsg.Text = lang.Translate(user.Language, typeText,
 					"Select the notification time:")
-				sndMsg.ReplyMarkup = buttons.InputTime12(state.Hours, state.Minute, state.Meridiem)
+				sndMsg.ReplyMarkup = buttons.InputTime12(state)
 			}
 		}
 	case "upMinute":
 		if user.Stage == "new_task_time" {
-			if state.Minute < 59 {
-				state.Minute++
+			if state.Minute+state.Step < 60 {
+				state.Minute += state.Step
 			} else {
-				state.Minute = 0
+				state.Minute = state.Minute + state.Step - 60
 			}
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Select the notification time:")
 			if user.TimeFormat == 24 {
-				sndMsg.ReplyMarkup = buttons.InputTime24(state.Hours, state.Minute)
+				sndMsg.ReplyMarkup = buttons.InputTime24(state)
 			} else if user.TimeFormat == 12 {
-				sndMsg.ReplyMarkup = buttons.InputTime12(state.Hours, state.Minute, state.Meridiem)
+				sndMsg.ReplyMarkup = buttons.InputTime12(state)
 			}
 		}
 	case "downMinute":
 		if user.Stage == "new_task_time" {
-			if state.Minute > 0 {
-				state.Minute--
+			if state.Minute-state.Step >= 0 {
+				state.Minute -= state.Step
 			} else {
-				state.Minute = 59
+				state.Minute = state.Minute - state.Step + 60
 			}
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Select the notification time:")
 			if user.TimeFormat == 24 {
-				sndMsg.ReplyMarkup = buttons.InputTime24(state.Hours, state.Minute)
+				sndMsg.ReplyMarkup = buttons.InputTime24(state)
 			} else if user.TimeFormat == 12 {
-				sndMsg.ReplyMarkup = buttons.InputTime12(state.Hours, state.Minute, state.Meridiem)
+				sndMsg.ReplyMarkup = buttons.InputTime12(state)
 			}
 		}
 	case "changeMeridiem":
@@ -436,7 +436,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			}
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Select the notification time:")
-			sndMsg.ReplyMarkup = buttons.InputTime12(state.Hours, state.Minute, state.Meridiem)
+			sndMsg.ReplyMarkup = buttons.InputTime12(state)
 		}
 	case "TimeOK":
 		if task.TypeTask == "Everyday" {
@@ -665,6 +665,24 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 			sndMsg.DisableNotification = true
 			go data.Bot.Send(sndMsg)
 			return
+		}
+	case "step":
+		if user.Stage == "new_task_time" {
+			switch state.Step {
+			case 1:
+				state.Step = 5
+			case 5:
+				state.Step = 10
+			case 10:
+				state.Step = 1
+			}
+			sndMsg.Text = lang.Translate(user.Language, typeText,
+				"Select the notification time:")
+			if user.TimeFormat == 24 {
+				sndMsg.ReplyMarkup = buttons.InputTime24(state)
+			} else if user.TimeFormat == 12 {
+				sndMsg.ReplyMarkup = buttons.InputTime12(state)
+			}
 		}
 	default:
 		temp := strings.Split(callback.Data, "/")

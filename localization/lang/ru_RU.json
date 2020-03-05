@@ -79,7 +79,7 @@
         "Try again. Enter your time zone:": "*Попробуйте ещё раз. Введите ваш часовой пояс:*",
         "Enter your time zone. Example Los Angeles \"-8\", Moscow \"+3\":": "*Введите свой часовой пояс.* *Пример:* Москва \"+3\", Иркутск \"+8\":",
         "Account not found! Please register! To register, enter /start.": "*Аккаунт не найден! Пожалуйста, зарегистрируйтесь!* Для регистрации введите /start",
-        "Press button:": "*Нажмите кнопку:*",
+        "Press button:": "*Нажмите кнопку:*\n*Отменить* - /cancel",
         "Is your time ": "*Ваше время* ",
         "Registration completed successfully. Select an action:": "*Регистрация прошла успешно.*\n*Выберите действие:*",
         "Invalid command. Enter /start": "*Неверная команда.* Введите /start",
