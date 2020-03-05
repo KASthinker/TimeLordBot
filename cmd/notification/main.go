@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"flag"
@@ -78,6 +79,14 @@ func checkTasks(user db.Users) {
 			text := fmt.Sprintf("⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️⚜️\n%v🔰🔰🔰🔰🔰🔰🔰🔰🔰🔰🔰🔰",
 				task.GetTask(user.Language))
 			sendMessage(user, text)
+		}
+
+		if task.TypeTask == "Holiday" {
+			date := strings.Split(task.Date, "-")
+			year, _ := strconv.Atoi(date[0])
+			year++
+			task.Date = fmt.Sprintf("%d-%s-%s", year, date[1], date[2])
+			go db.UpdateHolidayTask(user.UserID, task.ID, task.Date)
 		}
 	}
 
