@@ -365,3 +365,21 @@ func GetUsers() ([]Users, error) {
 	}
 	return users, nil
 }
+
+// UpdateHolidayTask ...
+func UpdateHolidayTask(userID int64, taskID int, date string) error {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+	}
+
+	strUserID := fmt.Sprintf("`%v`", userID)
+	_, err = db.Exec(
+		fmt.Sprintf("UPDATE %v SET date='%v' WHERE id=%v", strUserID, date, taskID))
+	if err != nil {
+		log.Printf("\n\nError in update line\n%v\n\n\n", err)
+		return err
+	}
+
+	return nil
+}
