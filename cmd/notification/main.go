@@ -51,6 +51,7 @@ func main() {
 
 		for _, user := range users {
 			go checkTasks(user)
+			go db.DeleteOldCommonTask(user.UserID, user.TimeZone)
 		}
 		end := time.Now()
 		_, _, sec := end.Clock()

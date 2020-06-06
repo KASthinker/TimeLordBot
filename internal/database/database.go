@@ -20,7 +20,6 @@ type Users struct {
 	Language    string
 	TypeAccount string
 	TimeZone    string
-	GroupID     interface{}
 	UserID      int64
 	TimeFormat  int
 }
@@ -76,7 +75,7 @@ func NewUser(user *data.UserData, userID int64) error {
 			id INT NOT NULL AUTO_INCREMENT,
 			type_task VARCHAR(15) NOT NULL,
 			text VARCHAR(255) COLLATE utf8mb4_bin NOT NULL,
-			date VARCHAR(10),
+			date DATE,
 			time TIME NOT NULL,
 			weekday VARCHAR(70),
 			priority VARCHAR(20) NOT NULL,
@@ -332,6 +331,31 @@ func TodayTasks(userID int64, tz string, timeFormat int) ([]data.Task, error) {
 	return tasks, nil
 }
 
+// DeleteOldCommonTask ...
+func DeleteOldCommonTask(userID int64, tz string) {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	date, err := methods.LocDate(tz)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	strUserID := fmt.Sprintf("`%v`", userID)
+	_, err = db.Exec(
+		fmt.Sprintf("DELETE FROM %v WHERE type_task='Common' AND date<'%v';", strUserID, date))
+	if err != nil {
+		log.Printf("Error in delete old common line\n%v\n", err)
+		return
+	}
+
+	return
+}
+
 // GetUsers ...
 func GetUsers() ([]Users, error) {
 	db, err = Connect()
@@ -352,7 +376,7 @@ func GetUsers() ([]Users, error) {
 		var user Users
 		err := rows.Scan(
 			&user.UserID, &user.Language, &user.TypeAccount,
-			&user.TimeZone, &user.TimeFormat, &user.GroupID)
+			&user.TimeZone, &user.TimeFormat)
 		if err != nil {
 			log.Println(err)
 			return nil, err
