@@ -19,8 +19,8 @@ var (
 func main() {
 	conf := configs.Configs()
 	once.Do(func() {
-		db, err = sql.Open("mysql", 
-		fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", 
+		db, err = sql.Open("mysql",
+			fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
 				conf.User, conf.Password, conf.Host, conf.DBname))
 	})
 
@@ -45,28 +45,11 @@ func main() {
             type_account VARCHAR(6) DEFAULT 'User',
 			timezone VARCHAR(3) NOT NULL,
 			time_format INT NOT NULL,
-            group_id VARCHAR(255),
             PRIMARY KEY (user_id)
 		);`)
 	if err != nil {
 		log.Println(err)
 	} else {
 		log.Println("OK! -> 'CREATE TABLE Users'")
-	}
-
-	_, err = db.Exec(
-		`
-		CREATE TABLE Groups (
-			id INT NOT NULL AUTO_INCREMENT,
-			group_name VARCHAR(255) NOT NULL,
-			group_timezone VARCHAR(3) NOT NULL,
-			time_format INT NOT NULL,
-			creator INT NOT NULL,
-			PRIMARY KEY (id)
-		);`)
-	if err != nil {
-		log.Println(err)
-	} else {
-		log.Println("OK! -> 'CREATE TABLE Groups'")
 	}
 }

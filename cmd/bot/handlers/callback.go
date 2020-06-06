@@ -673,7 +673,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 				state.Step = 5
 			case 5:
 				state.Step = 10
-			case 10:
+			default:
 				state.Step = 1
 			}
 			sndMsg.Text = lang.Translate(user.Language, typeText,

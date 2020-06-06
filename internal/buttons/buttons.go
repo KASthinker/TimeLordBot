@@ -46,12 +46,6 @@ func Menu(lang string) *tgbotapi.InlineKeyboardMarkup {
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				"💼 "+loc.Translate(lang, typeText, "Group tasks"), "group_tasks"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(
-				"👔 "+loc.Translate(lang, typeText, "Groups"), "groups"),
-			tgbotapi.NewInlineKeyboardButtonData(
 				"🔙 "+loc.Translate(lang, typeText, "Back"), "step_back_start"),
 		),
 	)
@@ -116,29 +110,6 @@ func TypeTasks(lang string) *tgbotapi.InlineKeyboardMarkup {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				"🔙 "+loc.Translate(lang, typeText, "Back"), "step_back_menu"),
-		),
-	)
-	return &keyboard
-}
-
-// Groups ...
-func Groups(lang string) *tgbotapi.InlineKeyboardMarkup {
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(
-				"💼 "+loc.Translate(lang, typeText, "My groups"), "my_groups"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(
-				"🤴 "+loc.Translate(lang, typeText, "Create group"), "create_groups"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(
-				"💣 "+loc.Translate(lang, typeText, "Delete group"), "delete_group"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(
-				"🔙 "+loc.Translate(lang, typeText, "Back"), "step_back"),
 		),
 	)
 	return &keyboard
