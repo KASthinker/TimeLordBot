@@ -407,3 +407,23 @@ func UpdateHolidayTask(userID int64, taskID int, date string) error {
 
 	return nil
 }
+
+// IfUserAdmin ...
+func IfUserAdmin(userID int64) bool {
+	db, err = Connect()
+	if err != nil {
+		log.Println(err)
+	}
+
+	strUserID := fmt.Sprintf("'%v'", userID)
+	row := db.QueryRow(fmt.Sprintf(`
+		SELECT type_account 
+		FROM Users 
+		WHERE user_id=%s AND type_account='Admin';`, strUserID))
+
+	if row.Scan() == sql.ErrNoRows {
+		log.Println(row.Scan(err))
+		return false
+	}
+	return true
+}
