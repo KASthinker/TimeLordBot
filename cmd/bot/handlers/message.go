@@ -146,7 +146,6 @@ func MessageHandler(message *tgbotapi.Message) {
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				user.Stage = ""
 			}
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
 			user.Stage = ""
 		}
@@ -161,7 +160,6 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Try again. Enter your time zone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			user.Stage = "change_timezone"
 		}
 
@@ -210,7 +208,6 @@ func MessageHandler(message *tgbotapi.Message) {
 						user.Stage = "update_timezone"
 					}
 				}
-				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 				// Enter new task
 			} else if user.Stage == "new_task_text" {
 				go data.Bot.DeleteMessage(

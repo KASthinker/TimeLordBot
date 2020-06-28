@@ -348,6 +348,7 @@ func CallbackHandler(callback *tgbotapi.CallbackQuery) {
 						"The task list is empty. Select an action:")
 					user.Stage = ""
 					sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+					sndMsg.ParseMode = "Markdown"
 					go data.Bot.Send(sndMsg)
 				}
 			}
