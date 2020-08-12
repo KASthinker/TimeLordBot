@@ -3,3 +3,4 @@ configs/helpconf.toml
 log.txt
 main
 bin*
+notyfication_log.txt

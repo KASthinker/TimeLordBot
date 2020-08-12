@@ -103,6 +103,16 @@ func MessageHandler(message *tgbotapi.Message) {
 		}
 		go data.Bot.Send(sndMsg)
 		return
+	case "send_admin_message":
+		if db.IfUserAdmin(message.Chat.ID) {
+			user.Stage = "send_admin_message"
+			go data.Bot.DeleteMessage(
+				tgbotapi.NewDeleteMessage(message.Chat.ID, message.MessageID-1))
+			sndMsg.Text = "*Enter a message for all users:*"
+			sndMsg.ParseMode = "Markdown"
+			go data.Bot.Send(sndMsg)
+			return
+		}
 	}
 
 	switch message.Text {
@@ -136,7 +146,6 @@ func MessageHandler(message *tgbotapi.Message) {
 				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
 				user.Stage = ""
 			}
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		} else {
 			user.Stage = ""
 		}
@@ -151,7 +160,6 @@ func MessageHandler(message *tgbotapi.Message) {
 			sndMsg.Text = lang.Translate(user.Language, typeText,
 				"Try again. Enter your time zone:")
 			sndMsg.ReplyMarkup = buttons.InputTimeZone(user.Language)
-			sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			user.Stage = "change_timezone"
 		}
 
@@ -200,7 +208,6 @@ func MessageHandler(message *tgbotapi.Message) {
 						user.Stage = "update_timezone"
 					}
 				}
-				sndMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 				// Enter new task
 			} else if user.Stage == "new_task_text" {
 				go data.Bot.DeleteMessage(
@@ -227,6 +234,27 @@ func MessageHandler(message *tgbotapi.Message) {
 					sndMsg.ReplyMarkup = buttons.InputTime24(state)
 				}
 				/////////////////////////////////////////////////////////////////////
+
+			} else if user.Stage == "send_admin_message" && db.IfUserAdmin(message.Chat.ID) {
+				users, err := db.GetUsers()
+				if err != nil {
+					sndMsg.Text = "*Error get users data!*"
+					user.Stage = ""
+					return
+				}
+				for _, user := range users {
+					sndMsg := tgbotapi.NewMessage(user.UserID, "")
+					sndMsg.Text = message.Text
+					sndMsg.ParseMode = "Markdown"
+					go data.Bot.Send(sndMsg)
+				}
+				user.Stage = ""
+				sndMsg := tgbotapi.NewMessage(message.Chat.ID, "")
+				sndMsg.Text = "*Messages have been sent!*"
+				sndMsg.ParseMode = "Markdown"
+				sndMsg.ReplyMarkup = buttons.StartButtons(user.Language)
+				go data.Bot.Send(sndMsg)
+				return
 			} else {
 				data.TasksMap[message.Chat.ID] = new(data.Task)
 				user.Stage = ""

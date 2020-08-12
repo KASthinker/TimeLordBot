@@ -31,12 +31,12 @@ func GetToken() string {
 	return tkn.Token
 }
 
-// Configs return config list
-func Configs() *DataBase {
+// Configs return config struct
+func Configs() DataBase {
 	var db DataBase
 
 	if _, err := toml.DecodeFile(path, &db); err != nil {
 		log.Fatalf("Configs not received: %v\n%v", err, db)
 	}
-	return &db
+	return db
 }
