@@ -6,7 +6,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-const path = "./configs/helpconf.toml"
+const path = "./configs/configs.toml"
 
 // Token ...
 type Token struct {
