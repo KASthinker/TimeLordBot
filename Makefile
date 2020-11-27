@@ -7,7 +7,7 @@ first: dir bot notification initDB archive
 dir:
 	@rm -rf bin
 	@mkdir -p bin/bot/configs && mkdir -p bin/bot/localization
-	@cp configs/helpconf.toml bin/bot/configs/helpconf.toml 
+	@cp configs/configs.toml bin/bot/configs/configs.toml 
 	@cp -r localization/lang bin/bot/localization
 	@echo [OK]: Auxiliary files created.
 
